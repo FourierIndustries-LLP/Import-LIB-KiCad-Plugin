@@ -9,7 +9,6 @@
 
 import wx
 import wx.xrc
-import wx.adv
 
 ###########################################################################
 ## Class impartGUI
@@ -18,7 +17,7 @@ import wx.adv
 class impartGUI ( wx.Dialog ):
 
     def __init__( self, parent ):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"impartGUI", pos = wx.DefaultPosition, size = wx.Size( 650,650 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.BORDER_DEFAULT )
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"KiCad Importer", pos = wx.DefaultPosition, size = wx.Size( 650,650 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.BORDER_DEFAULT )
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
@@ -32,8 +31,12 @@ class impartGUI ( wx.Dialog ):
 
         bSizer.Add( self.m_button_migrate, 1, wx.ALL|wx.EXPAND, 5 )
 
-        self.m_button = wx.Button( self, wx.ID_ANY, u"Start", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer.Add( self.m_button, 0, wx.ALL|wx.EXPAND, 5 )
+        self.m_staticText_librarypath2 = wx.StaticText( self, wx.ID_ANY, u"Console", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText_librarypath2.Wrap( -1 )
+
+        self.m_staticText_librarypath2.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
+
+        bSizer.Add( self.m_staticText_librarypath2, 0, wx.ALL, 5 )
 
         self.m_text = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_BESTWRAP|wx.TE_MULTILINE )
         bSizer.Add( self.m_text, 1, wx.ALL|wx.EXPAND, 5 )
@@ -45,70 +48,110 @@ class impartGUI ( wx.Dialog ):
 
         bSizer.Add( self.m_staticline11, 0, wx.EXPAND |wx.ALL, 5 )
 
-        fgSizer2 = wx.FlexGridSizer( 0, 3, 0, 0 )
-        fgSizer2.SetFlexibleDirection( wx.HORIZONTAL )
-        fgSizer2.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_ALL )
-
-        self.m_buttonImportManual = wx.Button( self, wx.ID_ANY, u"Manual Import", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer2.Add( self.m_buttonImportManual, 0, wx.ALL, 5 )
-
-        m_choice1Choices = [ u"EeasyEDA /  LCSC Part#" ]
-        self.m_choice1 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
-        self.m_choice1.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice1, 0, wx.ALL|wx.EXPAND, 5 )
-
-        self.m_textCtrl2 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_PROCESS_ENTER )
-        self.m_textCtrl2.SetMinSize( wx.Size( 220,-1 ) )
-
-        fgSizer2.Add( self.m_textCtrl2, 0, wx.EXPAND|wx.ALL, 5 )
-
-
-        bSizer.Add( fgSizer2, 0, wx.ALIGN_CENTER_HORIZONTAL, 5 )
-
         self.m_staticline12 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
         self.m_staticline12.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
         self.m_staticline12.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_GRAYTEXT ) )
 
         bSizer.Add( self.m_staticline12, 0, wx.EXPAND |wx.ALL, 5 )
 
-        fgSizer1 = wx.FlexGridSizer( 0, 4, 0, 0 )
-        fgSizer1.SetFlexibleDirection( wx.BOTH )
-        fgSizer1.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"Source of Import", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText7.Wrap( -1 )
 
-        fgSizer1.SetMinSize( wx.Size( -1,0 ) )
-        self.m_autoImport = wx.CheckBox( self, wx.ID_ANY, u"auto background import", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer1.Add( self.m_autoImport, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        self.m_staticText7.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
 
-        self.m_overwrite = wx.CheckBox( self, wx.ID_ANY, u"overwrite existing lib", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer1.Add( self.m_overwrite, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        bSizer.Add( self.m_staticText7, 0, wx.ALL, 5 )
 
-        self.m_check_import_all = wx.CheckBox( self, wx.ID_ANY, u"import old format", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_check_import_all.Enable( False )
-        self.m_check_import_all.Hide()
+        fgSizer21 = wx.FlexGridSizer( 3, 2, 0, 0 )
+        fgSizer21.AddGrowableCol( 2 )
+        fgSizer21.AddGrowableRow( 3 )
+        fgSizer21.SetFlexibleDirection( wx.HORIZONTAL )
+        fgSizer21.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_NONE )
 
-        fgSizer1.Add( self.m_check_import_all, 0, wx.ALL, 5 )
+        self.m_button_selectzip = wx.Button( self, wx.ID_ANY, u"Select Zip File from SamacSys/Ultralibrarian", wx.DefaultPosition, wx.DefaultSize, 0 )
+        fgSizer21.Add( self.m_button_selectzip, 1, wx.ALL|wx.EXPAND, 5 )
 
-        self.m_check_autoLib = wx.CheckBox( self, wx.ID_ANY, u"auto KiCad setting", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer1.Add( self.m_check_autoLib, 0, wx.ALL, 5 )
+        self.m_dirPicker_sourcepath = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.Size( -1,-1 ), wx.FLP_DEFAULT_STYLE )
+        fgSizer21.Add( self.m_dirPicker_sourcepath, 2, wx.ALL|wx.EXPAND, 5 )
+
+        self.m_button_selectlcsc = wx.Button( self, wx.ID_ANY, u"Select LCSC #", wx.DefaultPosition, wx.DefaultSize, 0 )
+        fgSizer21.Add( self.m_button_selectlcsc, 1, wx.ALL|wx.EXPAND, 5 )
+
+        self.m_textCtrl_lcsc_number = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 400,-1 ), wx.TE_PROCESS_ENTER )
+        fgSizer21.Add( self.m_textCtrl_lcsc_number, 2, wx.ALL|wx.EXPAND, 5 )
 
 
-        bSizer.Add( fgSizer1, 0, wx.ALIGN_CENTER, 5 )
+        bSizer.Add( fgSizer21, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
 
-        self.m_staticText_sourcepath = wx.StaticText( self, wx.ID_ANY, u"Folder of the library to import:", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticline121 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+        self.m_staticline121.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
+        self.m_staticline121.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_GRAYTEXT ) )
+
+        bSizer.Add( self.m_staticline121, 0, wx.EXPAND |wx.ALL, 5 )
+
+        self.m_staticText_sourcepath = wx.StaticText( self, wx.ID_ANY, u"Import Parameters", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_sourcepath.Wrap( -1 )
 
-        bSizer.Add( self.m_staticText_sourcepath, 0, wx.ALL, 5 )
+        self.m_staticText_sourcepath.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
 
-        self.m_dirPicker_sourcepath = wx.DirPickerCtrl( self, wx.ID_ANY, u".", u"Select a folder", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE )
-        bSizer.Add( self.m_dirPicker_sourcepath, 0, wx.ALL|wx.EXPAND, 5 )
+        bSizer.Add( self.m_staticText_sourcepath, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
-        self.m_staticText_librarypath = wx.StaticText( self, wx.ID_ANY, u"Library save location:", wx.DefaultPosition, wx.DefaultSize, 0 )
+        fgSizer11 = wx.FlexGridSizer( 2, 2, 0, 0 )
+        fgSizer11.AddGrowableCol( 2 )
+        fgSizer11.AddGrowableRow( 2 )
+        fgSizer11.SetFlexibleDirection( wx.HORIZONTAL )
+        fgSizer11.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_NONE )
+
+        self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, u"Prefix (e.g. \"MCU_Atmel\")", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText13.Wrap( -1 )
+
+        fgSizer11.Add( self.m_staticText13, 0, wx.ALL, 5 )
+
+        self.m_textCtrl_prefix = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl_prefix.SetMinSize( wx.Size( 380,-1 ) )
+
+        fgSizer11.Add( self.m_textCtrl_prefix, 0, wx.ALL, 5 )
+
+        self.m_staticText131 = wx.StaticText( self, wx.ID_ANY, u"Part Number (e.g. ATmega4809-AU)", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText131.Wrap( -1 )
+
+        fgSizer11.Add( self.m_staticText131, 0, wx.ALL, 5 )
+
+        self.m_textCtrl_partno = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl_partno.SetMinSize( wx.Size( 380,-1 ) )
+
+        fgSizer11.Add( self.m_textCtrl_partno, 0, wx.ALL, 5 )
+
+
+        bSizer.Add( fgSizer11, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+
+        self.m_staticline1211 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+        self.m_staticline1211.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
+        self.m_staticline1211.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_GRAYTEXT ) )
+
+        bSizer.Add( self.m_staticline1211, 0, wx.EXPAND |wx.ALL, 5 )
+
+        self.m_staticText_sourcepath1 = wx.StaticText( self, wx.ID_ANY, u"Output Parameters", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText_sourcepath1.Wrap( -1 )
+
+        self.m_staticText_sourcepath1.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
+
+        bSizer.Add( self.m_staticText_sourcepath1, 0, wx.ALL, 5 )
+
+        self.m_overwrite = wx.CheckBox( self, wx.ID_ANY, u"Overwrite existing entry in library", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer.Add( self.m_overwrite, 0, wx.ALL, 5 )
+
+        self.m_staticText_librarypath = wx.StaticText( self, wx.ID_ANY, u"Library location (where you stored your library):", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_librarypath.Wrap( -1 )
 
         bSizer.Add( self.m_staticText_librarypath, 0, wx.ALL, 5 )
 
         self.m_dirPicker_librarypath = wx.DirPickerCtrl( self, wx.ID_ANY, u".", u"Select a folder", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE )
         bSizer.Add( self.m_dirPicker_librarypath, 0, wx.ALL|wx.EXPAND, 5 )
+
+        self.m_staticText_librarypath1 = wx.StaticText( self, wx.ID_ANY, u"Library name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText_librarypath1.Wrap( -1 )
+
+        bSizer.Add( self.m_staticText_librarypath1, 0, wx.ALL, 5 )
 
         self.m_staticline1 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
         self.m_staticline1.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
@@ -125,8 +168,11 @@ class impartGUI ( wx.Dialog ):
 
         bSizer.Add( self.m_staticText5, 0, wx.EXPAND|wx.TOP|wx.RIGHT|wx.LEFT, 5 )
 
-        self.m_hyperlink = wx.adv.HyperlinkCtrl( self, wx.ID_ANY, u"github.com/Steffen-W/Import-LIB-KiCad-Plugin", u"https://github.com/Steffen-W/Import-LIB-KiCad-Plugin", wx.DefaultPosition, wx.DefaultSize, wx.adv.HL_DEFAULT_STYLE )
-        bSizer.Add( self.m_hyperlink, 0, wx.BOTTOM|wx.RIGHT|wx.LEFT, 5 )
+        self.m_textCtrl_libname = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer.Add( self.m_textCtrl_libname, 0, wx.ALL|wx.EXPAND, 5 )
+
+        self.m_button = wx.Button( self, wx.ID_ANY, u"Import!", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer.Add( self.m_button, 0, wx.ALL|wx.EXPAND, 5 )
 
 
         self.SetSizer( bSizer )
@@ -137,11 +183,11 @@ class impartGUI ( wx.Dialog ):
         # Connect Events
         self.Bind( wx.EVT_CLOSE, self.on_close )
         self.m_button_migrate.Bind( wx.EVT_BUTTON, self.migrate_libs )
-        self.m_button.Bind( wx.EVT_BUTTON, self.BottonClick )
-        self.m_buttonImportManual.Bind( wx.EVT_BUTTON, self.ButtomManualImport )
-        self.m_textCtrl2.Bind( wx.EVT_TEXT_ENTER, self.ButtomManualImport )
-        self.m_dirPicker_sourcepath.Bind( wx.EVT_DIRPICKER_CHANGED, self.DirChange )
+        self.m_button_selectzip.Bind( wx.EVT_BUTTON, self.ButtomManualImport )
+        self.m_button_selectlcsc.Bind( wx.EVT_BUTTON, self.ButtomManualImport )
+        self.m_textCtrl_lcsc_number.Bind( wx.EVT_TEXT_ENTER, self.ButtomManualImport )
         self.m_dirPicker_librarypath.Bind( wx.EVT_DIRPICKER_CHANGED, self.DirChange )
+        self.m_button.Bind( wx.EVT_BUTTON, self.BottonClick )
 
     def __del__( self ):
         pass
@@ -154,15 +200,15 @@ class impartGUI ( wx.Dialog ):
     def migrate_libs( self, event ):
         event.Skip()
 
-    def BottonClick( self, event ):
-        event.Skip()
-
     def ButtomManualImport( self, event ):
         event.Skip()
+
 
 
     def DirChange( self, event ):
         event.Skip()
 
+    def BottonClick( self, event ):
+        event.Skip()
 
 
