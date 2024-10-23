@@ -156,7 +156,7 @@
             <property name="enabled">1</property>
             <property name="fg"></property>
             <property name="floatable">1</property>
-            <property name="font"></property>
+            <property name="font">Consolas,90,400,-1,76,0</property>
             <property name="gripper">0</property>
             <property name="hidden">0</property>
             <property name="id">wxID_ANY</property>
@@ -186,7 +186,7 @@
             <property name="validator_style">wxFILTER_NONE</property>
             <property name="validator_type">wxDefaultValidator</property>
             <property name="validator_variable"></property>
-            <property name="value"></property>
+            <property name="value">asdasdasd</property>
             <property name="window_extra_style"></property>
             <property name="window_name"></property>
             <property name="window_style"></property>

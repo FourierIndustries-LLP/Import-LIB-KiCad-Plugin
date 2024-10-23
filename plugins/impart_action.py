@@ -5,6 +5,8 @@ from time import sleep
 from threading import Thread
 import sys
 import traceback
+import pathlib
+from impart_easyeda import easyeda2kicad_wrapper
 
 
 """
@@ -19,18 +21,18 @@ backend_h.config.set_DEST_PATH(self.m_dirPicker_librarypath.GetPath()). The libr
 import_all() from KiCadImport.py is the main function responsible for importing a ZIP file, so modifications to prefixes etc has to modify that function.
 In KiCadImport.py, remote_type.name will have to be replaced with the custom library name to make sure all of them goes into the same library of parts
 
+The key import functions: import_footprint, import_dcm, import_lib, import_lib_new, import_model, 
+
 SnapEDA have a bad issue with not including the 3D model with the symbol+footprint combination and I will not add it in the GUI as an option
 
 Ultralibrarian requires you to select 3D diagram AND Kicad format before this will import all the models, so be careful with those
 
-
 The current non-volatile configuration file includes:
-SRC_PATH: the source of the zip file's containing directory. This should not be saved any further since we are directly specifying the zip file to import
+SRC_PATH: the source of the zip file's containing directory (now modified to the path to the zip file itself)
 DEST_PATH: the library's path (aka the destination)
 
 We should add the following config variables:
 LIB_NAME: The name of the library, instead of naming our libraries as the source of the symbol/footprint. This is company specific
-
 """
 
 
@@ -106,23 +108,18 @@ class impart_backend:
 
         minVersion = "8.0.4"
         if version_to_tuple(pcbnew.Version()) < version_to_tuple(minVersion):
-            self.print2buffer("KiCad Version: " + str(pcbnew.FullVersion()))
+            self.print2buffer("[warning]: KiCad Version: " + str(pcbnew.FullVersion()))
             self.print2buffer("Minimum required KiCad version is " + minVersion)
-            self.print2buffer("This can limit the functionality of the plugin.")
+            self.print2buffer("The plugin may not function as intended.\n")
 
         if not self.config.config_is_set:
-            self.print2buffer(
-                "Warning: The path where the libraries should be saved has not been adjusted yet."
-                + " Maybe you use the plugin in this version for the first time.\n"
-            )
+            self.print2buffer("[warning]: You have not yet selected a library save location. "
+                            + "Please select the location first (it should be the same as what you defined as the KICAD_3RD_PARTY path variable)")
 
             additional_information = (
-                "If this plugin is being used for the first time, settings in KiCad are required. "
-                + "The settings are checked at the end of the import process. For easy setup, "
-                + "auto setting can be activated."
+                "If this plugin is being used for the first time, additional setup in KiCad is required\n"
             )
             self.print2buffer(additional_information)
-            self.print2buffer("\n##############################\n")
 
     def print2buffer(self, *args):
         for text in args:
@@ -130,42 +127,66 @@ class impart_backend:
 
     def __find_new_file__(self):
         path = self.config.get_SRC_PATH()
+        lib_name = self.config.get_LIB_NAME()
 
-        if not os.path.isdir(path):
+        if not os.path.isfile(path):
             return 0
 
         while True:
-            newfilelist = self.folderhandler.GetNewFiles(path)
-            for lib in newfilelist:
-                try:
-                    (res,) = self.importer.import_all(
-                        lib,
-                        overwrite_if_exists=self.overwriteImport,
-                        import_old_format=self.import_old_format,
-                    )
-                    self.print2buffer(res)
-                except AssertionError as e:
-                    self.print2buffer(e)
-                except Exception as e:
-                    self.print2buffer(e)
-                    backend_h.print2buffer(f"Error: {e}")
-                    backend_h.print2buffer("Python version " + sys.version)
-                    print(traceback.format_exc())
-                self.print2buffer("")
-
+            try:
+                (res,) = self.importer.import_all(
+                    path,
+                    overwrite_if_exists=self.overwriteImport,
+                    import_old_format=self.import_old_format,
+                )
+                self.print2buffer(res)
+            except AssertionError as e:
+                self.print2buffer(e)
+            except Exception as e:
+                self.print2buffer(e)
+                backend_h.print2buffer(f"Error: {e}")
+                backend_h.print2buffer("Python version " + sys.version)
+                print(traceback.format_exc())
+            self.print2buffer("")
             if not self.runThread:
                 break
             if not pcbnew.GetBoard():
-                # print("pcbnew close")
                 break
             sleep(1)
+
+        # while True:
+        #     newfilelist = self.folderhandler.GetNewFiles(path)
+        #     for lib in newfilelist:
+        #         try:
+        #             (res,) = self.importer.import_all(
+        #                 lib,
+        #                 overwrite_if_exists=self.overwriteImport,
+        #                 import_old_format=self.import_old_format,
+        #             )
+        #             self.print2buffer(res)
+        #         except AssertionError as e:
+        #             self.print2buffer(e)
+        #         except Exception as e:
+        #             self.print2buffer(e)
+        #             backend_h.print2buffer(f"Error: {e}")
+        #             backend_h.print2buffer("Python version " + sys.version)
+        #             print(traceback.format_exc())
+        #         self.print2buffer("")
+
+        #     if not self.runThread:
+        #         break
+        #     if not pcbnew.GetBoard():
+        #         # print("pcbnew close")
+        #         break
+        #     sleep(1)
 
 
 backend_h = impart_backend()
 
 
 def checkImport(add_if_possible=True):
-    libnames = ["Octopart", "Samacsys", "UltraLibrarian", "Snapeda", "EasyEDA"]
+    LIB_NAME = backend_h.config.get_LIB_NAME()
+    libnames = [LIB_NAME]
     setting = backend_h.KiCad_Settings
     DEST_PATH = backend_h.config.get_DEST_PATH()
 
@@ -208,13 +229,10 @@ class impart_frontend(impartGUI):
         self.m_dirPicker_sourcepath.SetPath(backend_h.config.get_SRC_PATH())
         self.m_dirPicker_librarypath.SetPath(backend_h.config.get_DEST_PATH())
 
-        self.m_autoImport.SetValue(backend_h.autoImport)
         self.m_overwrite.SetValue(backend_h.overwriteImport)
-        self.m_check_autoLib.SetValue(backend_h.autoLib)
-        self.m_check_import_all.SetValue(backend_h.import_old_format)
 
         if backend_h.runThread:
-            self.m_button.Label = "automatic import / press to stop"
+            self.m_button.Label = "Automatic import / Press to stop"
         else:
             self.m_button.Label = "Start"
 
@@ -243,84 +261,100 @@ class impart_frontend(impartGUI):
             if dlg.ShowModal() != wx.ID_OK:
                 return
 
-        backend_h.autoImport = self.m_autoImport.IsChecked()
         backend_h.overwriteImport = self.m_overwrite.IsChecked()
-        backend_h.autoLib = self.m_check_autoLib.IsChecked()
-        backend_h.import_old_format = self.m_check_import_all.IsChecked()
         # backend_h.runThread = False
         self.Thread.stopThread = True  # only for text output
         event.Skip()
 
     def BottonClick(self, event):
-        backend_h.importer.set_DEST_PATH(backend_h.config.get_DEST_PATH())
+        # Save the library name and so first!
+        backend_h.config.set_LIB_NAME(self.m_textCtrl_libname.GetValue())
+        # Check if user is importing from ZIP or LCSC part number
+        selection = self.m_radioBox_source.GetSelection() # 0=zip import, 1=lcsc
+        # TODO: add prefix to part numbers
+        if selection == 1:
+            try:
+                component_id = self.m_textCtrl_lcsc_number.GetValue().strip()  # example: "C2040"
+                overwrite = self.m_overwrite.IsChecked()
+                backend_h.print2buffer("")
+                backend_h.print2buffer(
+                    "Attempting to import EasyEDA / LCSC Part# : " + component_id
+                )
+                base_folder = backend_h.config.get_DEST_PATH()
+                easyeda_import = easyeda2kicad_wrapper()
+                easyeda_import.print = backend_h.print2buffer
+                easyeda_import.full_import(component_id, base_folder, overwrite)
+                event.Skip()
+            except Exception as e:
+                backend_h.print2buffer(f"Error: {e}")
+                backend_h.print2buffer("Python version " + sys.version)
+                print(traceback.format_exc())
+        else:
+            backend_h.config.set_SRC_PATH(self.m_dirPicker_sourcepath.GetPath())
+            backend_h.config.set_DEST_PATH(self.m_dirPicker_librarypath.GetPath())
+            backend_h.importer.set_DEST_PATH(backend_h.config.get_DEST_PATH())
 
-        # backend_h.autoImport = self.m_autoImport.IsChecked()
-        backend_h.overwriteImport = self.m_overwrite.IsChecked()
-        # backend_h.autoLib = self.m_check_autoLib.IsChecked()
-        # backend_h.import_old_format = self.m_check_import_all.IsChecked()
+            backend_h.overwriteImport = self.m_overwrite.IsChecked()
 
-        if backend_h.runThread:
-            backend_h.runThread = False
-            self.m_button.Label = "Start"
-            return
-
-        backend_h.runThread = False
-        backend_h.__find_new_file__()
-        self.m_button.Label = "Start"
-
-        if backend_h.autoImport:
-            backend_h.runThread = True
-            self.m_button.Label = "automatic import / press to stop"
-            x = Thread(target=backend_h.__find_new_file__, args=[])
-            x.start()
-
-        add_if_possible = self.m_check_autoLib.IsChecked()
-        msg = checkImport(add_if_possible)
-        if msg:
-            msg += "\n\nMore information can be found in the README for the integration into KiCad.\n"
-            msg += "github.com/Steffen-W/Import-LIB-KiCad-Plugin"
-            msg += "\nSome configurations require a KiCad restart to be detected correctly."
-
-            dlg = wx.MessageDialog(None, msg, "WARNING", wx.KILL_OK | wx.ICON_WARNING)
-
-            if dlg.ShowModal() != wx.ID_OK:
+            if backend_h.runThread:
+                backend_h.runThread = False
+                self.m_button.Label = "Start"
                 return
 
-            backend_h.print2buffer("\n##############################\n")
-            backend_h.print2buffer(msg)
-            backend_h.print2buffer("\n##############################\n")
-        event.Skip()
+            backend_h.runThread = False
+            backend_h.__find_new_file__()
+            self.m_button.Label = "Start"
+
+            if backend_h.autoImport:
+                backend_h.runThread = True
+                self.m_button.Label = "Automatic import running / Press to stop"
+                x = Thread(target=backend_h.__find_new_file__, args=[])
+                x.start()
+
+            add_if_possible = False # TODO This variable appears to automatically add directories if it does not exist. We will need more experimentation on this
+            msg = checkImport(add_if_possible)
+            if msg:
+                msg += "\n\nMore information can be found in the README for the integration into KiCad.\n"
+                msg += "github.com/Steffen-W/Import-LIB-KiCad-Plugin"
+                msg += "\nSome configurations require a KiCad restart to be detected correctly."
+
+                dlg = wx.MessageDialog(None, msg, "WARNING", wx.KILL_OK | wx.ICON_WARNING)
+
+                if dlg.ShowModal() != wx.ID_OK:
+                    return
+
+                backend_h.print2buffer("\n##############################\n")
+                backend_h.print2buffer(msg)
+                backend_h.print2buffer("\n##############################\n")
+            event.Skip()
 
     def DirChange(self, event):
         backend_h.config.set_SRC_PATH(self.m_dirPicker_sourcepath.GetPath())
         backend_h.config.set_DEST_PATH(self.m_dirPicker_librarypath.GetPath())
+        backend_h.config.set_LIB_NAME(self.m_textCtrl_libname.GetValue())
         backend_h.folderhandler.filelist = []
         self.test_migrate_possible()
         event.Skip()
 
-    def ButtomManualImport(self, event):
-        try:
-            from impart_easyeda import easyeda2kicad_wrapper
-
-            component_id = self.m_textCtrl2.GetValue().strip()  # example: "C2040"
-            overwrite = self.m_overwrite.IsChecked()
-            backend_h.print2buffer("")
-            backend_h.print2buffer(
-                "Try to import EeasyEDA /  LCSC Part# : " + component_id
-            )
-            base_folder = backend_h.config.get_DEST_PATH()
-            easyeda_import = easyeda2kicad_wrapper()
-            easyeda_import.print = backend_h.print2buffer
-            easyeda_import.full_import(component_id, base_folder, overwrite)
-            event.Skip()
-        except Exception as e:
-            backend_h.print2buffer(f"Error: {e}")
-            backend_h.print2buffer("Python version " + sys.version)
-            print(traceback.format_exc())
+    def RadioBoxPressed(self, event):
+        selection = self.m_radioBox_source.GetSelection() # 0=zip import, 1=lcsc
+        if selection == 0:
+            self.m_staticText_lcscpartno.Hide()
+            self.m_textCtrl_lcsc_number.Hide()
+            self.m_staticText_zipfileloc.Show()
+            self.m_dirPicker_sourcepath.Show()
+        else:
+            self.m_staticText_lcscpartno.Show()
+            self.m_textCtrl_lcsc_number.Show()
+            self.m_staticText_zipfileloc.Hide()
+            self.m_dirPicker_sourcepath.Hide()
+        event.Skip()
 
     def get_old_libfiles(self):
         libpath = self.m_dirPicker_librarypath.GetPath()
-        libs = ["Octopart", "Samacsys", "UltraLibrarian", "Snapeda", "EasyEDA"]
+        LIB_NAME = backend_h.config.get_LIB_NAME()
+        libs = [LIB_NAME]
+        # libs = ["Octopart", "Samacsys", "UltraLibrarian", "Snapeda", "EasyEDA"]
         return find_old_lib_files(folder_path=libpath, libs=libs)
 
     def test_migrate_possible(self):
@@ -424,9 +458,9 @@ class ActionImpartPlugin(pcbnew.ActionPlugin):
             sys.path.append(current_dir)
 
     def set_LOGO(self, is_red=False):
-        self.name = "impartGUI"
+        self.name = "KiCad Importer"
         self.category = "Import library files"
-        self.description = "Import library files from Octopart, Samacsys, Ultralibrarian, Snapeda and EasyEDA"
+        self.description = "Import library files from Octopart, Samacsys, Ultralibrarian and EasyEDA"
         self.show_toolbar_button = True
 
         if not is_red:

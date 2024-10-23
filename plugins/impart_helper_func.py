@@ -162,8 +162,8 @@ class KiCad_Settings:
     def __add_entry_sexp__(
         self,
         path,
-        name="Snapeda",
-        uri="${KICAD_3RD_PARTY}/Snapeda.pretty",
+        name="Test_Unified_Lib",
+        uri="${KICAD_3RD_PARTY}/Test_Unified_Lib.pretty",
         type="KiCad",
         options="",
         descr="",
