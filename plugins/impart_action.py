@@ -110,12 +110,12 @@ class impart_backend:
 
         minVersion = "8.0.4"
         if version_to_tuple(pcbnew.Version()) < version_to_tuple(minVersion):
-            self.print2buffer("[warning]: KiCad Version: " + str(pcbnew.FullVersion()))
+            self.print2buffer("[warning] KiCad Version: " + str(pcbnew.FullVersion()))
             self.print2buffer("Minimum required KiCad version is " + minVersion)
             self.print2buffer("The plugin may not function as intended.\n")
 
         if not self.config.config_is_set:
-            self.print2buffer("[warning]: You have not yet selected a library save location. "
+            self.print2buffer("[warning] You have not yet selected a library save location. "
                             + "Please select the location first (it should be the same as what you defined as the KICAD_3RD_PARTY path variable)")
 
             additional_information = (
@@ -142,11 +142,11 @@ class impart_backend:
                     import_old_format=self.import_old_format,
                     library_name=lib_name
                 )
-                self.print2buffer(res)
+                self.print2buffer("[info] " + res)
             except AssertionError as e:
-                self.print2buffer(e)
+                self.print2buffer("[error] " + e)
             except Exception as e:
-                self.print2buffer(e)
+                self.print2buffer("[error] " + e)
                 backend_h.print2buffer(f"Error: {e}")
                 backend_h.print2buffer("Python version " + sys.version)
                 print(traceback.format_exc())
@@ -281,7 +281,7 @@ class impart_frontend(impartGUI):
                 overwrite = self.m_overwrite.IsChecked()
                 backend_h.print2buffer("")
                 backend_h.print2buffer(
-                    "Attempting to import EasyEDA / LCSC Part# : " + component_id
+                    "[info] Attempting to import EasyEDA / LCSC Part# : " + component_id
                 )
                 base_folder = backend_h.config.get_DEST_PATH()
                 easyeda_import = easyeda2kicad_wrapper()
@@ -289,7 +289,7 @@ class impart_frontend(impartGUI):
                 easyeda_import.full_import(component_id, base_folder, overwrite)
                 event.Skip()
             except Exception as e:
-                backend_h.print2buffer(f"Error: {e}")
+                backend_h.print2buffer(f"[error] {e}")
                 backend_h.print2buffer("Python version " + sys.version)
                 print(traceback.format_exc())
         else:

@@ -51,7 +51,7 @@ class config_handler:
             self.config["config"]["LIB_NAME"]
             self.config_is_set = True
         except:
-            self.print("An exception occurred during import " + self.config_path)
+            self.print("[error] An exception occurred when trying to read the configuration file at " + self.config_path)
             self.config = configparser.ConfigParser()
             self.config.add_section("config")
             self.config.set("config", "SRC_PATH", "")

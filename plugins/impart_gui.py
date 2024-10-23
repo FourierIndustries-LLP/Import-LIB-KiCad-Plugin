@@ -31,8 +31,8 @@ class impartGUI ( wx.Dialog ):
 
         bSizer.Add( self.m_staticText_librarypath2, 0, wx.ALL, 5 )
 
-        self.m_text = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_BESTWRAP|wx.TE_MULTILINE )
-        bSizer.Add( self.m_text, 1, wx.ALL|wx.EXPAND, 5 )
+        self.m_text = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_BESTWRAP|wx.TE_MULTILINE|wx.TE_READONLY )
+        bSizer.Add( self.m_text, 0, wx.ALL|wx.EXPAND, 5 )
 
         self.m_staticline11 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
         self.m_staticline11.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )

@@ -301,7 +301,7 @@ class import_lib:
                         if component_name.startswith(device):
                             if overwrite_if_exists:
                                 overwrite_existing = True
-                                self.print("Overwrite existing dcm")
+                                self.print("[info] Importing and overwriting existing dcm...")
                             else:
                                 overwrite_existing = False
                                 # self.print("Import of dcm skipped")
@@ -339,7 +339,7 @@ class import_lib:
             if overwrite_if_exists:
                 overwrite_existing = True
             else:
-                self.print("Import of 3d model skipped")
+                self.print("[info] Import of 3D model skipped")
                 self.model_skipped = True
                 return model_path
 
@@ -348,9 +348,9 @@ class import_lib:
             write_file.write_bytes(model_path.read_bytes())
             modified_objects.append(write_file, Modification.EXTRACTED_FILE)
             if overwrite_if_exists:
-                self.print("Overwrite existing 3d model")
+                self.print("[info] Importing and overwriting existing 3D model...")
             else:
-                self.print("Import 3d model")
+                self.print("[info] Importing 3D model...")
 
         return model_path
 
@@ -383,7 +383,7 @@ class import_lib:
 
         footprint_path_item = footprint_path_item_tmp
         if not footprint_path_item:
-            self.print("No footprint found")
+            self.print("[warn] No footprint found")
             return footprint_file_read, footprint_file_write
 
         if footprint_path_item.name.endswith("mod"):
@@ -415,9 +415,9 @@ class import_lib:
                 if footprint_file_read.exists():
                     if overwrite_if_exists:
                         overwrite_existing = True
-                        self.print("Overwrite existing footprint")
+                        self.print("[info] Importing and overwriting existing footprint")
                     else:
-                        self.print("Import of footprint skipped")
+                        self.print("[info] Import of footprint skipped")
                         self.footprint_skipped = True
                         return footprint_file_read, footprint_file_write
 
@@ -449,12 +449,12 @@ class import_lib:
                                 write_3d_into_file = True
                             else:
                                 writefile.write(line)
-                    self.print("Import footprint")
+                    self.print("[info] Importing footprint...")
             else:
                 check_file(footprint_file_write)
                 with footprint_file_write.open("wt", encoding='utf-8') as wr:
                     wr.write(footprint)
-                    self.print("Import footprint")
+                    self.print("[info] Importing footprint...")
 
         return footprint_file_read, footprint_file_write
 
@@ -560,9 +560,9 @@ class import_lib:
                             if overwrite_if_exists:
                                 overwrite_existing = True
                                 overwritten = True
-                                self.print("Overwrite existing lib")
+                                self.print("[info] Importing and overwriting existing lib file...")
                             else:
-                                self.print("Import of lib skipped")
+                                self.print("[info] Import of lib file is skipped")
                                 self.lib_skipped = True
                                 return device, lib_file_read, lib_file_write
                             writefile.write(
@@ -577,7 +577,7 @@ class import_lib:
                     else:
                         writefile.write(line)
         if not overwritten:
-            self.print("Import lib")
+            self.print("[info] Importing lib file...")
         return device, lib_file_read, lib_file_write
 
     def import_lib_new(
@@ -651,7 +651,7 @@ class import_lib:
                 writefile.write(text[-1])
 
             check_file(lib_file_read)
-            self.print("Import kicad_sym")
+            self.print("[info] Importing kicad_sym...")
             return device, lib_file_read, lib_file_write
 
         check_file(lib_file_read)
@@ -661,9 +661,9 @@ class import_lib:
 
         if device in existing_libs:
             if overwrite_if_exists:
-                self.print("Overwrite existing kicad_sym is not implemented")  # TODO
+                self.print("[error] Overwriting the existing kicad_sym file is not implemented!")  # TODO
             else:
-                self.print("Import of kicad_sym skipped")
+                self.print("[info] Import of kicad_sym skipped")
 
             return device, lib_file_read, lib_file_write
 
@@ -674,7 +674,7 @@ class import_lib:
             writefile.write(symbol_section + "\n")
             writefile.write(lib_file_txt[closing_bracket:])
 
-        self.print("Import kicad_sym")
+        self.print("[info] Imporing kicad_sym...")
 
         return device, lib_file_read, lib_file_write
 
@@ -685,7 +685,7 @@ class import_lib:
         if not zipfile.is_zipfile(zip_file):
             return None
 
-        self.print("Import: " + zip_file)
+        self.print("[info] Importing ZIP file: " + zip_file)
 
         with zipfile.ZipFile(zip_file) as zf:
             (
@@ -716,12 +716,12 @@ class import_lib:
 
                 if temp_path.exists() and cli.exists():
                     cli.upgrade_sym_lib(temp_path, temp_path_new)
-                    self.print("compatibility mode: convert from .lib to .kicad_sym")
+                    self.print("[info] Compatibility mode: automatically converting from .lib to .kicad_sym...")
 
                 if temp_path_new.exists() and temp_path_new.is_file():
                     self.lib_path_new = temp_path_new
                 else:
-                    self.print("error during conversion")
+                    self.print("[error] Failed to convert symbol library to new format!")
 
             if self.lib_path_new:
                 device, lib_file_new_read, lib_file_new_write = self.import_lib_new(
@@ -793,7 +793,7 @@ class import_lib:
                 and not self.footprint_skipped
             ):
                 self.print(
-                    'Warning renaming footprint file "'
+                    '[warning] Renaming footprint file from "'
                     + footprint_file_read.stem
                     + '" to "'
                     + self.footprint_name

@@ -127,11 +127,11 @@
             <property name="wrap">-1</property>
           </object>
         </object>
-        <object class="sizeritem" expanded="false">
+        <object class="sizeritem" expanded="true">
           <property name="border">5</property>
           <property name="flag">wxALL|wxEXPAND</property>
-          <property name="proportion">1</property>
-          <object class="wxTextCtrl" expanded="false">
+          <property name="proportion">0</property>
+          <object class="wxTextCtrl" expanded="true">
             <property name="BottomDockable">1</property>
             <property name="LeftDockable">1</property>
             <property name="RightDockable">1</property>
@@ -156,7 +156,7 @@
             <property name="enabled">1</property>
             <property name="fg"></property>
             <property name="floatable">1</property>
-            <property name="font">Consolas,90,400,-1,76,0</property>
+            <property name="font"></property>
             <property name="gripper">0</property>
             <property name="hidden">0</property>
             <property name="id">wxID_ANY</property>
@@ -178,7 +178,7 @@
             <property name="resize">Resizable</property>
             <property name="show">1</property>
             <property name="size"></property>
-            <property name="style">wxTE_BESTWRAP|wxTE_MULTILINE</property>
+            <property name="style">wxTE_BESTWRAP|wxTE_MULTILINE|wxTE_READONLY</property>
             <property name="subclass">; ; forward_declare</property>
             <property name="toolbar_pane">0</property>
             <property name="tooltip"></property>
@@ -186,7 +186,7 @@
             <property name="validator_style">wxFILTER_NONE</property>
             <property name="validator_type">wxDefaultValidator</property>
             <property name="validator_variable"></property>
-            <property name="value">asdasdasd</property>
+            <property name="value"></property>
             <property name="window_extra_style"></property>
             <property name="window_name"></property>
             <property name="window_style"></property>
