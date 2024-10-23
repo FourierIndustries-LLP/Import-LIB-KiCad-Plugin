@@ -6,6 +6,34 @@ from threading import Thread
 import sys
 import traceback
 
+
+"""
+Comments for modifying the codebase for general purpose needs
+
+Directory change calls a unified function called "DirChange". You can get the specific paths by directly referencing the pickers
+
+backend_h.config.set_SRC_PATH(self.m_dirPicker_sourcepath.GetPath()). The source path is where this tool will look for zip files to import
+backend_h.config.set_DEST_PATH(self.m_dirPicker_librarypath.GetPath()). The library path is where this tool will export all the files. 
+    This directory must be the same as ${KICAD_3RD_PARTY} as defined in Preferences > Configure Paths
+
+import_all() from KiCadImport.py is the main function responsible for importing a ZIP file, so modifications to prefixes etc has to modify that function.
+In KiCadImport.py, remote_type.name will have to be replaced with the custom library name to make sure all of them goes into the same library of parts
+
+SnapEDA have a bad issue with not including the 3D model with the symbol+footprint combination and I will not add it in the GUI as an option
+
+Ultralibrarian requires you to select 3D diagram AND Kicad format before this will import all the models, so be careful with those
+
+
+The current non-volatile configuration file includes:
+SRC_PATH: the source of the zip file's containing directory. This should not be saved any further since we are directly specifying the zip file to import
+DEST_PATH: the library's path (aka the destination)
+
+We should add the following config variables:
+LIB_NAME: The name of the library, instead of naming our libraries as the source of the symbol/footprint. This is company specific
+
+"""
+
+
 try:
     if __name__ == "__main__":
         from impart_gui import impartGUI
@@ -169,7 +197,6 @@ def checkImport(add_if_possible=True):
             msg += setting.check_footprintlib(name, add_if_possible)
     return msg
 
-
 class impart_frontend(impartGUI):
     global backend_h
 
@@ -227,10 +254,10 @@ class impart_frontend(impartGUI):
     def BottonClick(self, event):
         backend_h.importer.set_DEST_PATH(backend_h.config.get_DEST_PATH())
 
-        backend_h.autoImport = self.m_autoImport.IsChecked()
+        # backend_h.autoImport = self.m_autoImport.IsChecked()
         backend_h.overwriteImport = self.m_overwrite.IsChecked()
-        backend_h.autoLib = self.m_check_autoLib.IsChecked()
-        backend_h.import_old_format = self.m_check_import_all.IsChecked()
+        # backend_h.autoLib = self.m_check_autoLib.IsChecked()
+        # backend_h.import_old_format = self.m_check_import_all.IsChecked()
 
         if backend_h.runThread:
             backend_h.runThread = False

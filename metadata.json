@@ -1,9 +1,9 @@
 {
     "$schema": "https://go.kicad.org/pcm/schemas/v1",
-    "name": "impart GUI for KiCad",
-    "description": "Import library files from Octopart, Samacsys, Ultralibrarian, Snapeda and EasyEDA",
-    "description_full": "Import library files from Octopart, Samacsys, Ultralibrarian, Snapeda and EasyEDA.\n For usage and correct setup please read the Readme: \n https://github.com/Steffen-W/Import-LIB-KiCad-Plugin#use-of-the-application",
-    "identifier": "com.github.Steffen-W.impartGUI",
+    "name": "KiCad Importer",
+    "description": "Import library files from Octopart, Samacsys, Ultralibrarian and EasyEDA",
+    "description_full": "Import library files from Octopart, Samacsys, Ultralibrarian and EasyEDA.\n For usage and correct setup please read the Readme: \n https://github.com/Steffen-W/Import-LIB-KiCad-Plugin#use-of-the-application",
+    "identifier": "industries.fourier.kicadimport",
     "type": "plugin",
     "author": {
         "name": "Steffen Wittemeier",
@@ -27,7 +27,6 @@
         "octopart",
         "samacsys",
         "ultralibrarian",
-        "snapeda",
         "easyeda"
     ],
     "keep_on_update": [

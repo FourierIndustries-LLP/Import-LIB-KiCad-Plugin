@@ -125,7 +125,7 @@ class easyeda2kicad_wrapper:
             if filename_step:
                 print("3D model path (step): " + os.path.join(lib_path, filename_step))
 
-    def full_import(self, component_id="C2040", base_folder=False, overwrite=False):
+    def full_import(self, component_id="", base_folder=False, overwrite=False):
 
         base_folder = os.path.expanduser(base_folder)
 

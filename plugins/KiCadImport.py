@@ -98,6 +98,12 @@ class import_lib:
         self, zf: zipfile.ZipFile
     ) -> Tuple[Path, Path, Path, Path, REMOTE_TYPES]:
         """
+        This function takes the parameter root_path, which is the path to a single zip file
+        containing a Samacsys/Octopart/UltraLibrarian/SnapEDA archive, and processes it into 4
+        distinct paths: `dcm` path for the documentation of a symbol, `lib` path for the symbol,
+        `footprint` path for the footprint, and `model` path for the 3D model, as well as a `remote_type`
+        indicator to show where the archive came from
+
         :param root_path:
         :type root_path: Path
         :return: dcm_path, lib_path, footprint_path, model_path, remote_type
