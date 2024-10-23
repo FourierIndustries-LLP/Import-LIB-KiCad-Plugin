@@ -47,11 +47,14 @@ class config_handler:
         try:
             self.config.read(self.config_path)
             self.config["config"]["SRC_PATH"]  # only for check
-            self.config["config"]["DEST_PATH"] # only for check
+            self.config["config"]["DEST_PATH"]  # only for check
             self.config["config"]["LIB_NAME"]
             self.config_is_set = True
         except:
-            self.print("[error] An exception occurred when trying to read the configuration file at " + self.config_path)
+            self.print(
+                "[error] An exception occurred when trying to read the configuration file at "
+                + self.config_path
+            )
             self.config = configparser.ConfigParser()
             self.config.add_section("config")
             self.config.set("config", "SRC_PATH", "")

@@ -92,7 +92,6 @@ class PluginThread(Thread):
 
 
 class impart_backend:
-
     def __init__(self):
         path2config = os.path.join(os.path.dirname(__file__), "config.ini")
         self.config = config_handler(path2config)
@@ -118,12 +117,12 @@ class impart_backend:
             self.print2buffer("The plugin may not function as intended.\n")
 
         if not self.config.config_is_set:
-            self.print2buffer("[warning] You have not yet selected a library save location. "
-                            + "Please select the location first (it should be the same as what you defined as the KICAD_3RD_PARTY path variable)")
-
-            additional_information = (
-                "If this plugin is being used for the first time, additional setup in KiCad is required\n"
+            self.print2buffer(
+                "[warning] You have not yet selected a library save location. "
+                + "Please select the location first (it should be the same as what you defined as the KICAD_3RD_PARTY path variable)"
             )
+
+            additional_information = "If this plugin is being used for the first time, additional setup in KiCad is required\n"
             self.print2buffer(additional_information)
 
     def print2buffer(self, *args):
@@ -143,7 +142,7 @@ class impart_backend:
                     path,
                     overwrite_if_exists=self.overwriteImport,
                     import_old_format=self.import_old_format,
-                    library_name=lib_name
+                    library_name=lib_name,
                 )
                 self.print2buffer("[info] " + res)
             except AssertionError as e:
@@ -224,6 +223,7 @@ def checkImport(add_if_possible=True):
             msg += setting.check_footprintlib(name, add_if_possible)
     return msg
 
+
 class impart_frontend(impartGUI):
     global backend_h
 
@@ -276,11 +276,13 @@ class impart_frontend(impartGUI):
         # Save the library name and so first!
         backend_h.config.set_LIB_NAME(self.m_textCtrl_libname.GetValue())
         # Check if user is importing from ZIP or LCSC part number
-        selection = self.m_radioBox_source.GetSelection() # 0=zip import, 1=lcsc
+        selection = self.m_radioBox_source.GetSelection()  # 0=zip import, 1=lcsc
         # TODO: add prefix to part numbers
         if selection == 1:
             try:
-                component_id = self.m_textCtrl_lcsc_number.GetValue().strip()  # example: "C2040"
+                component_id = (
+                    self.m_textCtrl_lcsc_number.GetValue().strip()
+                )  # example: "C2040"
                 overwrite = self.m_overwrite.IsChecked()
                 backend_h.print2buffer(
                     "[info] Attempting to import EasyEDA / LCSC Part# : " + component_id
@@ -288,7 +290,12 @@ class impart_frontend(impartGUI):
                 base_folder = backend_h.config.get_DEST_PATH()
                 easyeda_import = easyeda2kicad_wrapper()
                 easyeda_import.print = backend_h.print2buffer
-                easyeda_import.full_import(component_id, base_folder, overwrite, str(self.m_textCtrl_libname.GetValue()))
+                easyeda_import.full_import(
+                    component_id,
+                    base_folder,
+                    overwrite,
+                    str(self.m_textCtrl_libname.GetValue()),
+                )
                 event.Skip()
             except Exception as e:
                 backend_h.print2buffer(f"[error] {e}")
@@ -316,14 +323,16 @@ class impart_frontend(impartGUI):
                 x = Thread(target=backend_h.__find_new_file__, args=[])
                 x.start()
 
-            add_if_possible = False # TODO This variable appears to automatically add directories if it does not exist. We will need more experimentation on this
+            add_if_possible = False  # TODO This variable appears to automatically add directories if it does not exist. We will need more experimentation on this
             msg = checkImport(add_if_possible)
             if msg:
                 msg += "\n\nMore information can be found in the README for the integration into KiCad.\n"
                 msg += "github.com/Steffen-W/Import-LIB-KiCad-Plugin"
                 msg += "\nSome configurations require a KiCad restart to be detected correctly."
 
-                dlg = wx.MessageDialog(None, msg, "WARNING", wx.KILL_OK | wx.ICON_WARNING)
+                dlg = wx.MessageDialog(
+                    None, msg, "WARNING", wx.KILL_OK | wx.ICON_WARNING
+                )
 
                 if dlg.ShowModal() != wx.ID_OK:
                     return
@@ -451,7 +460,9 @@ class ActionImpartPlugin(pcbnew.ActionPlugin):
     def set_LOGO(self, is_red=False):
         self.name = "KiCad Importer"
         self.category = "Import library files"
-        self.description = "Import library files from Octopart, Samacsys, Ultralibrarian and EasyEDA"
+        self.description = (
+            "Import library files from Octopart, Samacsys, Ultralibrarian and EasyEDA"
+        )
         self.show_toolbar_button = True
 
         if not is_red:
