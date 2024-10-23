@@ -47,7 +47,8 @@ class config_handler:
         try:
             self.config.read(self.config_path)
             self.config["config"]["SRC_PATH"]  # only for check
-            self.config["config"]["DEST_PATH"]  # only for check
+            self.config["config"]["DEST_PATH"] # only for check
+            self.config["config"]["LIB_NAME"]
             self.config_is_set = True
         except:
             self.print("An exception occurred during import " + self.config_path)
@@ -55,12 +56,16 @@ class config_handler:
             self.config.add_section("config")
             self.config.set("config", "SRC_PATH", "")
             self.config.set("config", "DEST_PATH", "")
+            self.config.set("config", "LIB_NAME", "")
 
+        # Set default values if not previously saved
         if self.config["config"]["SRC_PATH"] == "":
             self.config["config"]["SRC_PATH"] = str(Path.home() / "Downloads")
         if self.config["config"]["DEST_PATH"] == "":
             self.config["config"]["DEST_PATH"] = str(Path.home() / "KiCad")
             self.config_is_set = False
+        if self.config["config"]["LIB_NAME"] == "":
+            self.config["config"]["LIB_NAME"] = "My_Company_Library"
 
     def get_SRC_PATH(self):
         return self.config["config"]["SRC_PATH"]
@@ -74,6 +79,13 @@ class config_handler:
 
     def set_DEST_PATH(self, var):
         self.config["config"]["DEST_PATH"] = var
+        self.save_config()
+
+    def get_LIB_NAME(self):
+        return self.config["config"]["LIB_NAME"]
+
+    def set_LIB_NAME(self, var):
+        self.config["config"]["LIB_NAME"] = var
         self.save_config()
 
     def save_config(self):
