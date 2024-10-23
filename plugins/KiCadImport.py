@@ -208,6 +208,7 @@ class import_lib:
         dcm_path: pathlib.Path,
         overwrite_if_exists=True,
         file_ending="",
+        library_name: str="Test_Unified_Lib",
     ) -> Tuple[Union[pathlib.Path, None], Union[pathlib.Path, None]]:
         """
         # .dcm file parsing
@@ -263,9 +264,9 @@ class import_lib:
         if index_end is None:
             raise Warning(device + "not found in " + dcm_path.name)
 
-        dcm_file_read = self.DEST_PATH / (remote_type.name + file_ending + ".dcm")
+        dcm_file_read = self.DEST_PATH / (library_name + file_ending + ".dcm")
 
-        dcm_file_write = self.DEST_PATH / (remote_type.name + ".dcm~")
+        dcm_file_write = self.DEST_PATH / (library_name + ".dcm~")
         overwrite_existing = overwrote_existing = False
 
         check_file(dcm_file_read)
@@ -321,7 +322,7 @@ class import_lib:
         return dcm_file_read, dcm_file_write
 
     def import_model(
-        self, model_path: pathlib.Path, remote_type: REMOTE_TYPES, overwrite_if_exists
+        self, model_path: pathlib.Path, remote_type: REMOTE_TYPES, overwrite_if_exists, library_name: str
     ) -> Union[pathlib.Path, None]:
         # --------------------------------------------------------------------------------------------------------
         # 3D Model file extraction
@@ -330,7 +331,7 @@ class import_lib:
         if not model_path:
             return False
 
-        write_file = self.DEST_PATH / (remote_type.name + ".3dshapes") / model_path.name
+        write_file = self.DEST_PATH / (library_name + ".3dshapes") / model_path.name
 
         self.model_skipped = False
 
@@ -359,6 +360,7 @@ class import_lib:
         footprint_path: pathlib.Path,
         found_model: pathlib.Path,
         overwrite_if_exists=True,
+        library_name: str="Test_Unified_Lib",
     ) -> Tuple[Union[pathlib.Path, None], Union[pathlib.Path, None]]:
         """
         # Footprint file parsing
@@ -387,7 +389,7 @@ class import_lib:
         if footprint_path_item.name.endswith("mod"):
             footprint = footprint_path_item.read_text(encoding='utf-8')
 
-            footprint_write_path = self.DEST_PATH / (remote_type.name + ".pretty")
+            footprint_write_path = self.DEST_PATH / (library_name + ".pretty")
             footprint_file_read = footprint_write_path / footprint_path_item.name
             footprint_file_write = footprint_write_path / (
                 footprint_path_item.name + "~"
@@ -398,7 +400,7 @@ class import_lib:
                 model = [
                     '  (model "'
                     + "${KICAD_3RD_PARTY}/"
-                    + remote_type.name
+                    + library_name
                     + ".3dshapes/"
                     + found_model.name
                     + '"',
@@ -461,6 +463,7 @@ class import_lib:
         remote_type: REMOTE_TYPES,
         lib_path: pathlib.Path,
         overwrite_if_exists=True,
+        library_name: str="Test_Unified_Lib",
     ) -> Tuple[str, Union[pathlib.Path, None], Union[pathlib.Path, None]]:
         """
         .lib file parsing
@@ -496,7 +499,7 @@ class import_lib:
                     footprint = footprint.strip('"')
                     self.footprint_name = self.cleanName(footprint)
                     lib_lines[line_idx] = line.replace(
-                        footprint, remote_type.name + ":" + self.footprint_name, 1
+                        footprint, library_name + ":" + self.footprint_name, 1
                     )
                 elif line.startswith("ENDDEF"):
                     index_end = line_idx + 1
@@ -507,8 +510,8 @@ class import_lib:
         if index_end is None:
             raise Warning(device + " not found in " + lib_path.name)
 
-        lib_file_read = self.DEST_PATH / (remote_type.name + ".lib")
-        lib_file_write = self.DEST_PATH / (remote_type.name + ".lib~")
+        lib_file_read = self.DEST_PATH / (library_name + ".lib")
+        lib_file_write = self.DEST_PATH / (library_name + ".lib~")
         overwrite_existing = overwrote_existing = overwritten = False
 
         check_file(lib_file_read)
@@ -582,6 +585,7 @@ class import_lib:
         remote_type: REMOTE_TYPES,
         lib_path: pathlib.Path,
         overwrite_if_exists=True,
+        library_name: str="Test_Unified_Lib",
     ) -> Tuple[str, Union[pathlib.Path, None], Union[pathlib.Path, None]]:
         device = None
 
@@ -617,7 +621,7 @@ class import_lib:
                 name = self.cleanName(original_name)
                 modified_string = re.sub(
                     pattern,
-                    f'(property "Footprint" "{remote_type.name}:{name}"',
+                    f'(property "Footprint" "{library_name}:{name}"',
                     string,
                     flags=re.MULTILINE
                 )
@@ -630,9 +634,9 @@ class import_lib:
         symbol_section, _, _ = extract_symbol_section(lib_path.read_text(encoding='utf-8'))
         device = extract_symbol_names(symbol_section)[0]
 
-        lib_file_read = self.DEST_PATH / (remote_type.name + ".kicad_sym")
-        lib_file_read_old = self.DEST_PATH / (remote_type.name + "_kicad_sym.kicad_sym")
-        lib_file_write = self.DEST_PATH / (remote_type.name + ".kicad_sym~")
+        lib_file_read = self.DEST_PATH / (library_name + ".kicad_sym")
+        lib_file_read_old = self.DEST_PATH / (library_name + "_kicad_sym.kicad_sym")
+        lib_file_write = self.DEST_PATH / (library_name + ".kicad_sym~")
         if isfile(lib_file_read_old) and not isfile(lib_file_read):
             lib_file_read = lib_file_read_old
 
@@ -675,7 +679,7 @@ class import_lib:
         return device, lib_file_read, lib_file_write
 
     def import_all(
-        self, zip_file: pathlib.Path, overwrite_if_exists=True, import_old_format=True
+        self, zip_file: pathlib.Path, overwrite_if_exists=True, import_old_format=True, library_name: str="Test_Unified_Lib"
     ):
         """zip is a pathlib.Path to import the symbol from"""
         if not zipfile.is_zipfile(zip_file):
@@ -692,7 +696,7 @@ class import_lib:
                 remote_type,
             ) = self.get_remote_info(zf)
 
-            self.print("Identify " + remote_type.name)
+            self.print("[info]: ZIP file format identified as " + remote_type.name)
 
             CompatibilityMode = False
             if lib_path and not self.lib_path_new:
@@ -721,7 +725,7 @@ class import_lib:
 
             if self.lib_path_new:
                 device, lib_file_new_read, lib_file_new_write = self.import_lib_new(
-                    remote_type, self.lib_path_new, overwrite_if_exists
+                    remote_type, self.lib_path_new, overwrite_if_exists, library_name=library_name
                 )
 
                 file_ending = ""
@@ -734,6 +738,7 @@ class import_lib:
                     dcm_path,
                     overwrite_if_exists,
                     file_ending=file_ending,
+                    library_name=library_name,
                 )
                 if not import_old_format:
                     lib_path = None
@@ -746,19 +751,19 @@ class import_lib:
 
             if lib_path:
                 device, lib_file_read, lib_file_write = self.import_lib(
-                    remote_type, lib_path, overwrite_if_exists
+                    remote_type, lib_path, overwrite_if_exists, library_name=library_name
                 )
 
                 dcm_file_read, dcm_file_write = self.import_dcm(
-                    device, remote_type, dcm_path, overwrite_if_exists
+                    device, remote_type, dcm_path, overwrite_if_exists, library_name=library_name
                 )
 
             found_model = self.import_model(
-                model_path, remote_type, overwrite_if_exists
+                model_path, remote_type, overwrite_if_exists, library_name=library_name
             )
 
             footprint_file_read, footprint_file_write = self.import_footprint(
-                remote_type, footprint_path, found_model, overwrite_if_exists
+                remote_type, footprint_path, found_model, overwrite_if_exists, library_name=library_name
             )
 
             # replace read files with write files only after all operations succeeded

@@ -21,7 +21,9 @@ backend_h.config.set_DEST_PATH(self.m_dirPicker_librarypath.GetPath()). The libr
 import_all() from KiCadImport.py is the main function responsible for importing a ZIP file, so modifications to prefixes etc has to modify that function.
 In KiCadImport.py, remote_type.name will have to be replaced with the custom library name to make sure all of them goes into the same library of parts
 
-The key import functions: import_footprint, import_dcm, import_lib, import_lib_new, import_model, 
+The key import functions: import_footprint, import_dcm, import_lib, import_lib_new, import_model, which are all called by import_all()
+
+TODO: found_model.name should be checked to see if it should be altered (since we get to define the model name in the GUI)
 
 SnapEDA have a bad issue with not including the 3D model with the symbol+footprint combination and I will not add it in the GUI as an option
 
@@ -138,6 +140,7 @@ class impart_backend:
                     path,
                     overwrite_if_exists=self.overwriteImport,
                     import_old_format=self.import_old_format,
+                    library_name=lib_name
                 )
                 self.print2buffer(res)
             except AssertionError as e:
