@@ -24,7 +24,7 @@ from easyeda2kicad.kicad.export_kicad_symbol import ExporterSymbolKicad
 class easyeda2kicad_wrapper:
 
     def print(self, txt):
-        print("easyeda:" + txt)
+        print("\{LCSC\} " + txt)
 
     def import_Symbol(
         self,
@@ -44,7 +44,7 @@ class easyeda2kicad_wrapper:
         )
 
         if not overwrite and is_id_already_in_symbol_lib:
-            self.print("Use overwrite option to update the older symbol")
+            self.print("[info] Symbol already exists, please enable the overwrite option if you wish to update the older symbol")
             return 1
 
         exporter = ExporterSymbolKicad(
@@ -68,12 +68,13 @@ class easyeda2kicad_wrapper:
                 kicad_version=kicad_version,
             )
 
-        self.print(f"Created Kicad symbol {easyeda_symbol.info.name}")
-        print(f"Library path : {output}.{sym_lib_ext}")
+        self.print(f"[info] Created Kicad symbol {easyeda_symbol.info.name}")
+        print(f"[info] Library path : {output}.{sym_lib_ext}")
 
     def import_Footprint(
-        self, cad_data, output, overwrite=False, lib_name="EASYEDA2KICAD"
+        self, cad_data, output, overwrite=False, lib_path_var="EASYEDA2KICAD", lib_name="Test_Unified_Lib"
     ):
+        # WARNING: the `output` parameter contains the full path to the library, and can only be used in the front
         importer = EasyedaFootprintImporter(easyeda_cp_cad_data=cad_data)
         easyeda_footprint = importer.get_footprint()
 
@@ -82,15 +83,15 @@ class easyeda2kicad_wrapper:
         )
 
         if not overwrite and is_id_already_in_footprint_lib:
-            self.print("Use overwrite option to replace the older footprint")
+            self.print("[info] Footprint already exists, please enable the overwrite option if you wish to update the older footprint")
             return 1
 
         ki_footprint = ExporterFootprintKicad(footprint=easyeda_footprint)
         footprint_filename = f"{easyeda_footprint.info.name}.kicad_mod"
         footprint_path = f"{output}.pretty"
-        model_3d_path = f"{output}.3dshapes".replace("\\", "/").replace("./", "/")
+        # model_3d_path = f"{output}.3dshapes".replace("\\", "/").replace("./", "/")
 
-        model_3d_path = f"${{{lib_name}}}/EasyEDA.3dshapes"
+        model_3d_path = f"${{{lib_path_var}}}/{lib_name}.3dshapes"
 
         ki_footprint.export(
             footprint_full_path=f"{footprint_path}/{footprint_filename}",
@@ -125,18 +126,17 @@ class easyeda2kicad_wrapper:
             if filename_step:
                 print("3D model path (step): " + os.path.join(lib_path, filename_step))
 
-    def full_import(self, component_id="", base_folder=False, overwrite=False):
+    def full_import(self, component_id="", base_folder=False, overwrite=False, lib_name="Test_Unified_Lib"):
 
         base_folder = os.path.expanduser(base_folder)
 
         if not component_id.startswith("C"):
-            self.print("lcsc_id should start by C.... example: C2040")
+            self.print("[error] LCSC Part Number should start with C.... example: C2040")
             return False
 
         if not os.path.isdir(base_folder):
             os.makedirs(base_folder, exist_ok=True)
 
-        lib_name = "EasyEDA"
         output = f"{base_folder}/{lib_name}"
 
         lib_var = "KICAD_3RD_PARTY"
@@ -144,12 +144,12 @@ class easyeda2kicad_wrapper:
         # Create new footprint folder if it does not exist
         if not os.path.isdir(f"{output}.pretty"):
             os.mkdir(f"{output}.pretty")
-            self.print(f"Create {lib_name}.pretty footprint folder in {base_folder}")
+            self.print(f"[info] Created {lib_name}.pretty footprint folder in {base_folder}")
 
         # Create new 3d model folder if don't exist
         if not os.path.isdir(f"{output}.3dshapes"):
             os.mkdir(f"{output}.3dshapes")
-            self.print(f"Create {lib_name}.3dshapes 3D model folder in {base_folder}")
+            self.print(f"[info] Created {lib_name}.3dshapes 3D model folder in {base_folder}")
 
         lib_extension = "kicad_sym"
         if not os.path.isfile(f"{output}.{lib_extension}"):
@@ -171,13 +171,13 @@ class easyeda2kicad_wrapper:
 
         # API returned no data
         if not cad_data:
-            self.print(f"Failed to fetch data from EasyEDA API for part {component_id}")
+            self.print(f"[error] Failed to fetch data from LCSC API for part {component_id}")
             return 1
 
         # ---------------- SYMBOL ----------------
         self.import_Symbol(cad_data, output, overwrite=overwrite)
         # ---------------- FOOTPRINT -------------
-        self.import_Footprint(cad_data, output, overwrite=overwrite, lib_name=lib_var)
+        self.import_Footprint(cad_data, output, overwrite=overwrite, lib_path_var=lib_var, lib_name=lib_name)
         # ---------------- 3D MODEL --------------
         self.import_3D_Model(cad_data, output)
         return 0

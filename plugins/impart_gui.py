@@ -17,7 +17,7 @@ import wx.xrc
 class impartGUI ( wx.Dialog ):
 
     def __init__( self, parent ):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"KiCad Importer", pos = wx.DefaultPosition, size = wx.Size( 655,635 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.BORDER_DEFAULT )
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"KiCad Importer", pos = wx.DefaultPosition, size = wx.Size( 655,696 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.BORDER_DEFAULT )
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
@@ -72,12 +72,9 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText_lcscpartno = wx.StaticText( self, wx.ID_ANY, u"LCSC Part Number", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_lcscpartno.Wrap( -1 )
 
-        self.m_staticText_lcscpartno.Hide()
-
         bSizer.Add( self.m_staticText_lcscpartno, 0, wx.ALL, 5 )
 
         self.m_textCtrl_lcsc_number = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TE_PROCESS_ENTER )
-        self.m_textCtrl_lcsc_number.Hide()
         self.m_textCtrl_lcsc_number.SetMaxSize( wx.Size( -1,20 ) )
 
         bSizer.Add( self.m_textCtrl_lcsc_number, 2, wx.ALL|wx.EXPAND, 5 )
@@ -101,7 +98,7 @@ class impartGUI ( wx.Dialog ):
         fgSizer11.SetFlexibleDirection( wx.HORIZONTAL )
         fgSizer11.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_NONE )
 
-        self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, u"Prefix (e.g. \"MCU_Atmel\")", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, u"Optional Prefix (e.g. \"MCU_Atmel\")", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText13.Wrap( -1 )
 
         fgSizer11.Add( self.m_staticText13, 0, wx.ALL, 5 )
@@ -193,6 +190,7 @@ class impartGUI ( wx.Dialog ):
         self.Bind( wx.EVT_CLOSE, self.on_close )
         self.m_radioBox_source.Bind( wx.EVT_RADIOBOX, self.RadioBoxPressed )
         self.m_dirPicker_librarypath.Bind( wx.EVT_DIRPICKER_CHANGED, self.DirChange )
+        self.m_textCtrl_libname.Bind( wx.EVT_TEXT, self.DirChange )
         self.m_button_migrate.Bind( wx.EVT_BUTTON, self.migrate_libs )
         self.m_button.Bind( wx.EVT_BUTTON, self.BottonClick )
 
@@ -209,6 +207,7 @@ class impartGUI ( wx.Dialog ):
 
     def DirChange( self, event ):
         event.Skip()
+
 
     def migrate_libs( self, event ):
         event.Skip()

@@ -35,6 +35,9 @@ DEST_PATH: the library's path (aka the destination)
 
 We should add the following config variables:
 LIB_NAME: The name of the library, instead of naming our libraries as the source of the symbol/footprint. This is company specific
+
+One of the issues when it comes to footprint naming is that some parts already use standardized footprints. For example, a QFN chip probably
+already complies to a pre-installed QFN footprint. Footprint hunting might be more difficult when there's no prefix
 """
 
 
@@ -279,14 +282,13 @@ class impart_frontend(impartGUI):
             try:
                 component_id = self.m_textCtrl_lcsc_number.GetValue().strip()  # example: "C2040"
                 overwrite = self.m_overwrite.IsChecked()
-                backend_h.print2buffer("")
                 backend_h.print2buffer(
                     "[info] Attempting to import EasyEDA / LCSC Part# : " + component_id
                 )
                 base_folder = backend_h.config.get_DEST_PATH()
                 easyeda_import = easyeda2kicad_wrapper()
                 easyeda_import.print = backend_h.print2buffer
-                easyeda_import.full_import(component_id, base_folder, overwrite)
+                easyeda_import.full_import(component_id, base_folder, overwrite, str(self.m_textCtrl_libname.GetValue()))
                 event.Skip()
             except Exception as e:
                 backend_h.print2buffer(f"[error] {e}")
@@ -336,21 +338,7 @@ class impart_frontend(impartGUI):
         backend_h.config.set_DEST_PATH(self.m_dirPicker_librarypath.GetPath())
         backend_h.config.set_LIB_NAME(self.m_textCtrl_libname.GetValue())
         backend_h.folderhandler.filelist = []
-        self.test_migrate_possible()
-        event.Skip()
-
-    def RadioBoxPressed(self, event):
-        selection = self.m_radioBox_source.GetSelection() # 0=zip import, 1=lcsc
-        if selection == 0:
-            self.m_staticText_lcscpartno.Hide()
-            self.m_textCtrl_lcsc_number.Hide()
-            self.m_staticText_zipfileloc.Show()
-            self.m_dirPicker_sourcepath.Show()
-        else:
-            self.m_staticText_lcscpartno.Show()
-            self.m_textCtrl_lcsc_number.Show()
-            self.m_staticText_zipfileloc.Hide()
-            self.m_dirPicker_sourcepath.Hide()
+        # self.test_migrate_possible()
         event.Skip()
 
     def get_old_libfiles(self):
