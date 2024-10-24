@@ -465,7 +465,7 @@ class ActionImpartPlugin(pcbnew.ActionPlugin):
         if current_dir not in sys.path:
             sys.path.append(current_dir)
 
-    def set_LOGO(self, is_red=False):
+    def set_LOGO(self):
         self.name = "KiCad Importer"
         self.category = "Import library files"
         self.description = (
@@ -473,14 +473,9 @@ class ActionImpartPlugin(pcbnew.ActionPlugin):
         )
         self.show_toolbar_button = True
 
-        if not is_red:
-            self.icon_file_name = os.path.join(
-                os.path.dirname(__file__), "icon_small.png"
-            )
-        else:
-            self.icon_file_name = os.path.join(
-                os.path.dirname(__file__), "icon_small_red.png"
-            )
+        self.icon_file_name = os.path.join(
+            os.path.dirname(__file__), "icon_small.png"
+        )
         self.dark_icon_file_name = self.icon_file_name
 
     def Run(self):
