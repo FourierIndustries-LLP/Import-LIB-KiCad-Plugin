@@ -5,7 +5,6 @@ from time import sleep
 from threading import Thread
 import sys
 import traceback
-import pathlib
 from impart_easyeda import easyeda2kicad_wrapper
 
 
@@ -54,6 +53,7 @@ try:
         from .impart_helper_func import filehandler, config_handler, KiCad_Settings
         from .impart_migration import find_old_lib_files, convert_lib_list
 except Exception as e:
+    print(e)
     print(traceback.format_exc())
 
 
@@ -232,8 +232,10 @@ class impart_frontend(impartGUI):
         self.board = board
         self.action = action
 
+        # Set default values
         self.m_dirPicker_sourcepath.SetPath(backend_h.config.get_SRC_PATH())
         self.m_dirPicker_librarypath.SetPath(backend_h.config.get_DEST_PATH())
+        self.m_textCtrl_libname.SetValue(backend_h.config.get_LIB_NAME())
 
         self.m_overwrite.SetValue(backend_h.overwriteImport)
 
@@ -275,6 +277,11 @@ class impart_frontend(impartGUI):
     def BottonClick(self, event):
         # Save the library name and so first!
         backend_h.config.set_LIB_NAME(self.m_textCtrl_libname.GetValue())
+        backend_h.config.set_PREFIX(self.m_textCtrl_prefix.GetValue())
+        prefix = self.m_textCtrl_prefix.GetValue()
+        if len(prefix) > 0 and prefix[-1] == '_':
+            # strip _ character from the right side in case the user added it
+            prefix = prefix[0:-1]
         # Check if user is importing from ZIP or LCSC part number
         selection = self.m_radioBox_source.GetSelection()  # 0=zip import, 1=lcsc
         # TODO: add prefix to part numbers
@@ -295,6 +302,7 @@ class impart_frontend(impartGUI):
                     base_folder,
                     overwrite,
                     str(self.m_textCtrl_libname.GetValue()),
+                    prefix
                 )
                 event.Skip()
             except Exception as e:

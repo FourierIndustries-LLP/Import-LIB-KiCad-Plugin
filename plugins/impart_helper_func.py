@@ -49,6 +49,7 @@ class config_handler:
             self.config["config"]["SRC_PATH"]  # only for check
             self.config["config"]["DEST_PATH"]  # only for check
             self.config["config"]["LIB_NAME"]
+            self.config["config"]["PREFIX"]
             self.config_is_set = True
         except:
             self.print(
@@ -60,6 +61,7 @@ class config_handler:
             self.config.set("config", "SRC_PATH", "")
             self.config.set("config", "DEST_PATH", "")
             self.config.set("config", "LIB_NAME", "")
+            self.config.set("config", "PREFIX", "")
 
         # Set default values if not previously saved
         if self.config["config"]["SRC_PATH"] == "":
@@ -68,7 +70,7 @@ class config_handler:
             self.config["config"]["DEST_PATH"] = str(Path.home() / "KiCad")
             self.config_is_set = False
         if self.config["config"]["LIB_NAME"] == "":
-            self.config["config"]["LIB_NAME"] = "My_Company_Library"
+            self.config["config"]["LIB_NAME"] = "Test_Unified_Lib"
 
     def get_SRC_PATH(self):
         return self.config["config"]["SRC_PATH"]
@@ -89,6 +91,13 @@ class config_handler:
 
     def set_LIB_NAME(self, var):
         self.config["config"]["LIB_NAME"] = var
+        self.save_config()
+    
+    def get_PREFIX(self):
+        return self.config["config"]["PREFIX"]
+
+    def set_PREFIX(self, var):
+        self.config["config"]["PREFIX"] = var
         self.save_config()
 
     def save_config(self):

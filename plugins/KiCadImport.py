@@ -7,7 +7,7 @@
 import pathlib
 from enum import Enum
 from zipfile import Path
-from typing import Tuple, Union, Any
+from typing import Tuple, Union
 import re
 import zipfile
 from os import stat, remove
