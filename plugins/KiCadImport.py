@@ -208,14 +208,16 @@ class import_lib:
         dcm_path: pathlib.Path,
         overwrite_if_exists=True,
         file_ending="",
-        library_name: str="Test_Unified_Lib",
+        library_name: str = "Test_Unified_Lib",
+        prefix: str = "",
     ) -> Tuple[Union[pathlib.Path, None], Union[pathlib.Path, None]]:
         """
         # .dcm file parsing
-        # Note this reads in the existing dcm file for the particular remote repo, and tries to catch any duplicates
-        # before overwriting or creating duplicates. It reads the existing dcm file line by line and simply copy+paste
-        # each line if nothing will be overwritten or duplicated. If something could be overwritten or duplicated, the
-        # terminal will prompt whether to overwrite or to keep the existing content and ignore the new file contents.
+        Note this reads in the existing dcm file for the particular remote repo, and tries to catch any duplicates
+        before overwriting or creating duplicates. It reads the existing dcm file line by line and simply copy+paste
+        each line if nothing will be overwritten or duplicated. If something could be overwritten or duplicated, the
+        terminal will prompt whether to overwrite or to keep the existing content and ignore the new file contents.
+        
         :returns: dcm_file_read, dcm_file_write
         """
 
@@ -223,7 +225,8 @@ class import_lib:
 
         # Array of values defining all attributes of .dcm file
         dcm_attributes = (
-            dcm_path.read_text(encoding='utf-8').splitlines()
+            dcm_path.read_text(encoding="utf-8").splitlines()
+            # If DCM does not exist in the archive, manually create our own DCM
             if dcm_path
             else ["#", "# " + device, "#", "$CMP " + device, "D", "F", "$ENDCMP"]
         )
@@ -239,8 +242,12 @@ class import_lib:
                     if attribute.strip() == "#" and index_header_start is None:
                         index_header_start = attribute_idx  # header start
                 elif attribute.startswith("$CMP "):
-                    component_name = attribute[5:].strip()
+                    if dcm_path:
+                        component_name = prefix + attribute[5:].strip()
+                    else: # If using a custom DCM, prefixes are already injected in the `device` variable and we do not need to inject them here
+                        component_name = attribute[5:].strip()
                     if not self.cleanName(component_name) == self.cleanName(device):
+                        self.print("[error] DCM unexpected device in " + self.cleanName(component_name) + "/" + self.cleanName(device))
                         raise Warning("Unexpected device in " + dcm_path.name)
                     dcm_attributes[attribute_idx] = attribute.replace(
                         component_name, device, 1
@@ -262,6 +269,7 @@ class import_lib:
                     if datasheet:
                         dcm_attributes[attribute_idx] = "F " + datasheet
         if index_end is None:
+            self.print("[error] DCM index_end not found")
             raise Warning(device + "not found in " + dcm_path.name)
 
         dcm_file_read = self.DEST_PATH / (library_name + file_ending + ".dcm")
@@ -272,11 +280,11 @@ class import_lib:
         check_file(dcm_file_read)
         check_file(dcm_file_write)
 
-        with dcm_file_read.open("rt", encoding='utf-8') as readfile:
-            with dcm_file_write.open("wt", encoding='utf-8') as writefile:
+        with dcm_file_read.open("rt", encoding="utf-8") as readfile:
+            with dcm_file_write.open("wt", encoding="utf-8") as writefile:
                 if stat(dcm_file_read).st_size == 0:
                     # todo Handle appending to empty file
-                    with dcm_file_read.open("wt", encoding='utf-8') as template_file:
+                    with dcm_file_read.open("wt", encoding="utf-8") as template_file:
                         template = ["EESchema-DOCLIB  Version 2.0", "#End Doc Library"]
                         template_file.writelines(line + "\n" for line in template)
                         template_file.close()
@@ -301,7 +309,9 @@ class import_lib:
                         if component_name.startswith(device):
                             if overwrite_if_exists:
                                 overwrite_existing = True
-                                self.print("[info] Importing and overwriting existing dcm...")
+                                self.print(
+                                    "[info] Importing and overwriting existing dcm..."
+                                )
                             else:
                                 overwrite_existing = False
                                 # self.print("Import of dcm skipped")
@@ -322,7 +332,11 @@ class import_lib:
         return dcm_file_read, dcm_file_write
 
     def import_model(
-        self, model_path: pathlib.Path, remote_type: REMOTE_TYPES, overwrite_if_exists, library_name: str
+        self,
+        model_path: pathlib.Path,
+        remote_type: REMOTE_TYPES,
+        overwrite_if_exists,
+        library_name: str,
     ) -> Union[pathlib.Path, None]:
         # --------------------------------------------------------------------------------------------------------
         # 3D Model file extraction
@@ -360,7 +374,7 @@ class import_lib:
         footprint_path: pathlib.Path,
         found_model: pathlib.Path,
         overwrite_if_exists=True,
-        library_name: str="Test_Unified_Lib",
+        library_name: str = "Test_Unified_Lib",
     ) -> Tuple[Union[pathlib.Path, None], Union[pathlib.Path, None]]:
         """
         # Footprint file parsing
@@ -387,7 +401,7 @@ class import_lib:
             return footprint_file_read, footprint_file_write
 
         if footprint_path_item.name.endswith("mod"):
-            footprint = footprint_path_item.read_text(encoding='utf-8')
+            footprint = footprint_path_item.read_text(encoding="utf-8")
 
             footprint_write_path = self.DEST_PATH / (library_name + ".pretty")
             footprint_file_read = footprint_write_path / footprint_path_item.name
@@ -415,21 +429,23 @@ class import_lib:
                 if footprint_file_read.exists():
                     if overwrite_if_exists:
                         overwrite_existing = True
-                        self.print("[info] Importing and overwriting existing footprint")
+                        self.print(
+                            "[info] Importing and overwriting existing footprint"
+                        )
                     else:
                         self.print("[info] Import of footprint skipped")
                         self.footprint_skipped = True
                         return footprint_file_read, footprint_file_write
 
                 check_file(footprint_file_read)
-                with footprint_file_read.open("wt", encoding='utf-8') as wr:
+                with footprint_file_read.open("wt", encoding="utf-8") as wr:
                     wr.write(footprint)
                     overwrote_existing = True
 
                 check_file(footprint_file_write)
 
-                with footprint_file_read.open("rt", encoding='utf-8') as readfile:
-                    with footprint_file_write.open("wt", encoding='utf-8') as writefile:
+                with footprint_file_read.open("rt", encoding="utf-8") as readfile:
+                    with footprint_file_write.open("wt", encoding="utf-8") as writefile:
                         if stat(footprint_file_read).st_size == 0:
                             # todo Handle appending to empty file?
                             pass
@@ -452,7 +468,7 @@ class import_lib:
                     self.print("[info] Importing footprint...")
             else:
                 check_file(footprint_file_write)
-                with footprint_file_write.open("wt", encoding='utf-8') as wr:
+                with footprint_file_write.open("wt", encoding="utf-8") as wr:
                     wr.write(footprint)
                     self.print("[info] Importing footprint...")
 
@@ -463,7 +479,7 @@ class import_lib:
         remote_type: REMOTE_TYPES,
         lib_path: pathlib.Path,
         overwrite_if_exists=True,
-        library_name: str="Test_Unified_Lib",
+        library_name: str = "Test_Unified_Lib",
     ) -> Tuple[str, Union[pathlib.Path, None], Union[pathlib.Path, None]]:
         """
         .lib file parsing
@@ -477,7 +493,7 @@ class import_lib:
         self.lib_skipped = False
 
         device = None
-        lib_lines = lib_path.read_text(encoding='utf-8').splitlines()
+        lib_lines = lib_path.read_text(encoding="utf-8").splitlines()
 
         # Find which lines contain the component information in file to be imported
         index_start = None
@@ -517,11 +533,11 @@ class import_lib:
         check_file(lib_file_read)
         check_file(lib_file_write)
 
-        with lib_file_read.open("rt", encoding='utf-8') as readfile:
-            with lib_file_write.open("wt", encoding='utf-8') as writefile:
+        with lib_file_read.open("rt", encoding="utf-8") as readfile:
+            with lib_file_write.open("wt", encoding="utf-8") as writefile:
                 if stat(lib_file_read).st_size == 0:
                     # todo Handle appending to empty file
-                    with lib_file_read.open("wt", encoding='utf-8') as template_file:
+                    with lib_file_read.open("wt", encoding="utf-8") as template_file:
                         template = [
                             "EESchema-LIBRARY Version 2.4",
                             "#encoding utf-8",
@@ -560,7 +576,9 @@ class import_lib:
                             if overwrite_if_exists:
                                 overwrite_existing = True
                                 overwritten = True
-                                self.print("[info] Importing and overwriting existing lib file...")
+                                self.print(
+                                    "[info] Importing and overwriting existing lib file..."
+                                )
                             else:
                                 self.print("[info] Import of lib file is skipped")
                                 self.lib_skipped = True
@@ -585,9 +603,10 @@ class import_lib:
         remote_type: REMOTE_TYPES,
         lib_path: pathlib.Path,
         overwrite_if_exists=True,
-        library_name: str="Test_Unified_Lib",
+        library_name: str = "Test_Unified_Lib",
+        prefix: str = "",
     ) -> Tuple[str, Union[pathlib.Path, None], Union[pathlib.Path, None]]:
-        device = None
+        symbol_name = None
 
         def extract_symbol_names(input_text):
             pattern = r'"(.*?)"'  # Searches for text in quotes
@@ -613,26 +632,63 @@ class import_lib:
             symbol_section = input_text[start_index:end_index]
             return symbol_section, start_index, end_index
 
-        def extract_footprint_name(string):
+        def extract_footprint_name(footprint_str: str, prefix: str=""):
             pattern = r'\(property\s+"Footprint"\s+"(.*?)"'
-            match = re.search(pattern, string, re.MULTILINE)
+            match = re.search(pattern, footprint_str, re.MULTILINE)
             if match:
                 original_name = match.group(1)
-                name = self.cleanName(original_name)
+                name = prefix + self.cleanName(original_name)
+                # Essentially replace the entire footprint line of the symbol
                 modified_string = re.sub(
                     pattern,
                     f'(property "Footprint" "{library_name}:{name}"',
-                    string,
-                    flags=re.MULTILINE
+                    footprint_str,
+                    flags=re.MULTILINE,
                 )
                 return name, modified_string
+            else:
+                return None
+        
+        def modify_symbol_name(symbol_str: str, prefix: str=""):
+            pattern1 = r'\(symbol\s+"(.*?)"'
+            pattern2 = r'\(property\s+"Value"\s+"(.*?)"'
+            match = re.search(pattern1, symbol_str, re.MULTILINE) and re.search(pattern2, symbol_str, re.MULTILINE)
+            if match:
+                original_name = match.group(1) # get the original symbol name
+                new_sym_name = prefix + self.cleanName(original_name)
+                # replace the name of the symbol
+                modified_string = re.sub(
+                    pattern1,
+                    f'(symbol "{new_sym_name}"',
+                    symbol_str,
+                    count=1, # only replace first instance!!
+                    flags=re.MULTILINE,
+                )
+                modified_string = re.sub(
+                    pattern2,
+                    f'(property "Value" "{new_sym_name}"',
+                    modified_string,
+                    flags=re.MULTILINE,
+                )
+                # replace names of subsymbols, which isn't covered by the main case
+                modified_string = modified_string.replace(f'(symbol "{original_name}', f'(symbol "{new_sym_name}')
+                return new_sym_name, modified_string
             else:
                 return None
 
         # lib_lines[line_idx] = line.replace(footprint, remote_type.name + ":" + self.footprint_name, 1)
 
-        symbol_section, _, _ = extract_symbol_section(lib_path.read_text(encoding='utf-8'))
-        device = extract_symbol_names(symbol_section)[0]
+        # extract the entire `(symbol ` portion from the new .kicad_sym file that was downloaded
+        symbol_section, _, _ = extract_symbol_section(
+            lib_path.read_text(encoding="utf-8")
+        )
+
+        # Add prefix to symbol name. We can only change the entry in (symbol and (property "Value" parts
+        if len(prefix) > 0:
+            symbol_name, symbol_section = modify_symbol_name(symbol_section, prefix)
+        else:
+            # get the symbol name, which is the first entry in quotes
+            symbol_name = extract_symbol_names(symbol_section)[0]
 
         lib_file_read = self.DEST_PATH / (library_name + ".kicad_sym")
         lib_file_read_old = self.DEST_PATH / (library_name + "_kicad_sym.kicad_sym")
@@ -640,46 +696,58 @@ class import_lib:
         if isfile(lib_file_read_old) and not isfile(lib_file_read):
             lib_file_read = lib_file_read_old
 
-        self.footprint_name, symbol_section_mod = extract_footprint_name(symbol_section)
+        # symbol_section_mod is string for the `(property "Footprint"` part of the
+        # symbol extracted from the sym file, which is then modified with our 
+        # custom prefix
+        # Over here, the footprint name is extracted and modified
+        self.footprint_name, symbol_section_mod = extract_footprint_name(symbol_section, prefix)
         symbol_section = symbol_section_mod
 
-        if not lib_file_read.exists():  # library does not yet exist
-            with lib_file_write.open("wt", encoding='utf-8') as writefile:
-                text = lib_path.read_text(encoding='utf-8').strip().split("\n")
-                writefile.write(text[0] + "\n")
+        if not lib_file_read.exists():  # symbol file does not yet exist
+            # Start writing the new .kicad_sym file
+            with lib_file_write.open("wt", encoding="utf-8") as writefile:
+                text = lib_path.read_text(encoding="utf-8").strip().split("\n") # read the entire kicad_sym file downloaded and slice it into lines
+                writefile.write(text[0] + "\n") # (kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)
                 writefile.write(symbol_section + "\n")
-                writefile.write(text[-1])
+                writefile.write(text[-1]) # )
 
             check_file(lib_file_read)
             self.print("[info] Importing kicad_sym...")
-            return device, lib_file_read, lib_file_write
+            return symbol_name, lib_file_read, lib_file_write
 
         check_file(lib_file_read)
 
-        lib_file_txt = lib_file_read.read_text(encoding='utf-8')
+        lib_file_txt = lib_file_read.read_text(encoding="utf-8")
         existing_libs = extract_symbol_names(lib_file_txt)
 
-        if device in existing_libs:
+        if symbol_name in existing_libs:
             if overwrite_if_exists:
-                self.print("[error] Overwriting the existing kicad_sym file is not implemented!")  # TODO
+                self.print(
+                    "[error] Overwriting the existing kicad_sym file is not implemented!"
+                )  # TODO
             else:
                 self.print("[info] Import of kicad_sym skipped")
 
-            return device, lib_file_read, lib_file_write
+            return symbol_name, lib_file_read, lib_file_write
 
         closing_bracket = lib_file_txt.rfind(")")
 
-        with lib_file_write.open("wt", encoding='utf-8') as writefile:
+        with lib_file_write.open("wt", encoding="utf-8") as writefile:
             writefile.write(lib_file_txt[:closing_bracket])
             writefile.write(symbol_section + "\n")
             writefile.write(lib_file_txt[closing_bracket:])
 
-        self.print("[info] Imporing kicad_sym...")
+        self.print("[info] Importing kicad_sym...")
 
-        return device, lib_file_read, lib_file_write
+        return symbol_name, lib_file_read, lib_file_write
 
     def import_all(
-        self, zip_file: pathlib.Path, overwrite_if_exists=True, import_old_format=True, library_name: str="Test_Unified_Lib"
+        self,
+        zip_file: pathlib.Path,
+        overwrite_if_exists=True,
+        import_old_format=True,
+        library_name: str = "Test_Unified_Lib",
+        prefix: str = "",
     ):
         """zip is a pathlib.Path to import the symbol from"""
         if not zipfile.is_zipfile(zip_file):
@@ -700,6 +768,7 @@ class import_lib:
 
             CompatibilityMode = False
             if lib_path and not self.lib_path_new:
+                # If the symbol file is in the old format
                 CompatibilityMode = True
 
                 temp_path = self.DEST_PATH / "temp.lib"
@@ -716,16 +785,25 @@ class import_lib:
 
                 if temp_path.exists() and cli.exists():
                     cli.upgrade_sym_lib(temp_path, temp_path_new)
-                    self.print("[info] Compatibility mode: automatically converting from .lib to .kicad_sym...")
+                    self.print(
+                        "[info] Compatibility mode: automatically converting from .lib to .kicad_sym..."
+                    )
 
                 if temp_path_new.exists() and temp_path_new.is_file():
                     self.lib_path_new = temp_path_new
                 else:
-                    self.print("[error] Failed to convert symbol library to new format!")
+                    self.print(
+                        "[error] Failed to convert symbol library to new format!"
+                    )
 
             if self.lib_path_new:
+                # If the symbol file is in the new format
                 device, lib_file_new_read, lib_file_new_write = self.import_lib_new(
-                    remote_type, self.lib_path_new, overwrite_if_exists, library_name=library_name
+                    remote_type,
+                    self.lib_path_new,
+                    overwrite_if_exists,
+                    library_name=library_name,
+                    prefix=prefix
                 )
 
                 file_ending = ""
@@ -739,7 +817,9 @@ class import_lib:
                     overwrite_if_exists,
                     file_ending=file_ending,
                     library_name=library_name,
+                    prefix=prefix
                 )
+                self.print("[info] DCM imported successfully")
                 if not import_old_format:
                     lib_path = None
 
@@ -751,11 +831,18 @@ class import_lib:
 
             if lib_path:
                 device, lib_file_read, lib_file_write = self.import_lib(
-                    remote_type, lib_path, overwrite_if_exists, library_name=library_name
+                    remote_type,
+                    lib_path,
+                    overwrite_if_exists,
+                    library_name=library_name,
                 )
 
                 dcm_file_read, dcm_file_write = self.import_dcm(
-                    device, remote_type, dcm_path, overwrite_if_exists, library_name=library_name
+                    device,
+                    remote_type,
+                    dcm_path,
+                    overwrite_if_exists,
+                    library_name=library_name,
                 )
 
             found_model = self.import_model(
@@ -763,7 +850,11 @@ class import_lib:
             )
 
             footprint_file_read, footprint_file_write = self.import_footprint(
-                remote_type, footprint_path, found_model, overwrite_if_exists, library_name=library_name
+                remote_type,
+                footprint_path,
+                found_model,
+                overwrite_if_exists,
+                library_name=library_name,
             )
 
             # replace read files with write files only after all operations succeeded
@@ -787,20 +878,21 @@ class import_lib:
                 elif lib_file_write.exists():
                     remove(lib_file_write)
 
+            # Check if footprint name matches symbol name, and if not, append the symbol name in front
             if (
                 footprint_file_read
                 and (self.footprint_name != footprint_file_read.stem)
                 and not self.footprint_skipped
             ):
                 self.print(
-                    '[warning] Renaming footprint file from "'
+                    '[warn] Renaming footprint file from "'
                     + footprint_file_read.stem
                     + '" to "'
                     + self.footprint_name
                     + '"'
                 )
 
-                if (footprint_file_read.exists()):
+                if footprint_file_read.exists():
                     remove(footprint_file_read)
                 footprint_file_read = footprint_file_read.parent / (
                     self.footprint_name + footprint_file_read.suffix

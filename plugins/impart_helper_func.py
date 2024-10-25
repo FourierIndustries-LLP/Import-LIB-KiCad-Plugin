@@ -116,9 +116,20 @@ class KiCad_Settings:
         path = os.path.join(self.SettingPath, "sym-lib-table")
         return self.__parse_table__(path)
 
-    def set_sym_table(self, libname: str, libpath: str):
+    def set_sym_table(self, libname: str, libpath: str, prefix=""):
+        """Adds an entry in the symbols table
+
+        Parameters
+        ----------
+        libname : str
+            The name of the symbol library, such as "Test_Unified_Lib", without the extension or path
+        libpath : str
+            The path to the library
+        prefix: str
+            The prefix for the part number, specified by the user (e.g. MCU_Atmel)
+        """
         path = os.path.join(self.SettingPath, "sym-lib-table")
-        self.__add_entry_sexp__(path, name=libname, uri=libpath)
+        self.__add_entry_sexp__(path, name=libname, uri=libpath, prefix=prefix)
 
     def sym_table_change_entry(self, old_uri, new_uri):
         path = os.path.join(self.SettingPath, "sym-lib-table")
@@ -128,10 +139,10 @@ class KiCad_Settings:
         path = os.path.join(self.SettingPath, "fp-lib-table")
         return self.__parse_table__(path)
 
-    def set_lib_table_entry(self, libname: str):
+    def set_lib_table_entry(self, libname: str, prefix: str=""):
         path = os.path.join(self.SettingPath, "fp-lib-table")
         uri_lib = "${KICAD_3RD_PARTY}/" + libname + ".pretty"
-        self.__add_entry_sexp__(path, name=libname, uri=uri_lib)
+        self.__add_entry_sexp__(path, name=libname, uri=uri_lib, prefix=prefix)
 
     def __parse_table__(self, path):
         sexp = readFile2var(path)
@@ -179,7 +190,8 @@ class KiCad_Settings:
         type="KiCad",
         options="",
         descr="",
-    ):
+        prefix="",
+    ):  
         table_entry = self.__parse_table__(path)
         entries = {lib["name"]: lib for lib in table_entry}
         if name in entries:
@@ -229,7 +241,7 @@ class KiCad_Settings:
         KiCadjson = self.get_kicad_common()
         return KiCadjson["environment"]["vars"]
 
-    def check_footprintlib(self, SearchLib, add_if_possible=True):
+    def check_footprintlib(self, SearchLib, add_if_possible=True, prefix=""):
         msg = ""
         FootprintTable = self.get_lib_table()
         FootprintLibs = {lib["name"]: lib for lib in FootprintTable}
@@ -243,11 +255,11 @@ class KiCad_Settings:
                 msg += "' with the path '" + temp_path + "' in Footprint Libraries."
                 if add_if_possible:
                     msg += "\nThe entry must either be corrected manually or deleted."
-                    # self.set_lib_table_entry(SearchLib) # TODO
+                    # self.set_lib_table_entry(SearchLib, prefix) # TODO
         else:
             msg += "\n" + SearchLib + " is not in the Footprint Libraries."
             if add_if_possible:
-                self.set_lib_table_entry(SearchLib)
+                self.set_lib_table_entry(SearchLib, prefix)
                 msg += "\nThe library " + SearchLib
                 msg += " has been successfully added."
                 msg += "\n##### A restart of KiCad is necessary. #####"
@@ -258,7 +270,7 @@ class KiCad_Settings:
 
         return msg
 
-    def check_symbollib(self, SearchLib: str, add_if_possible: bool = True):
+    def check_symbollib(self, SearchLib: str, add_if_possible: bool = True, prefix=""):
         msg = ""
         SearchLib_name = SearchLib.split(".")[0]
         SearchLib_name_short = SearchLib_name.split("_")[0]
@@ -269,16 +281,16 @@ class KiCad_Settings:
 
         temp_path = "${KICAD_3RD_PARTY}/" + SearchLib
 
-        if not temp_path in SymbolLibsUri:
+        if temp_path not in SymbolLibsUri:
             msg += "\n'" + temp_path + "' is not imported into the Symbol Libraries."
             if add_if_possible:
                 if SearchLib_name_short not in SymbolLibs:
-                    self.set_sym_table(SearchLib_name_short, temp_path)
+                    self.set_sym_table(SearchLib_name_short, temp_path, prefix)
                     msg += "\nThe library " + SearchLib
                     msg += " has been successfully added."
                     msg += "\n##### A restart of KiCad is necessary. #####"
                 elif SearchLib_name not in SymbolLibs:
-                    self.set_sym_table(SearchLib_name, temp_path)
+                    self.set_sym_table(SearchLib_name, temp_path, prefix)
                     msg += "\nThe library " + SearchLib
                     msg += " has been successfully added."
                     msg += "\n##### A restart of KiCad is necessary. #####"

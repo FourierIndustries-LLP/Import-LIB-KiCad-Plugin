@@ -112,13 +112,13 @@ class impart_backend:
 
         minVersion = "8.0.4"
         if version_to_tuple(pcbnew.Version()) < version_to_tuple(minVersion):
-            self.print2buffer("[warning] KiCad Version: " + str(pcbnew.FullVersion()))
+            self.print2buffer("[warn] KiCad Version: " + str(pcbnew.FullVersion()))
             self.print2buffer("Minimum required KiCad version is " + minVersion)
             self.print2buffer("The plugin may not function as intended.\n")
 
         if not self.config.config_is_set:
             self.print2buffer(
-                "[warning] You have not yet selected a library save location. "
+                "[warn] You have not yet selected a library save location. "
                 + "Please select the location first (it should be the same as what you defined as the KICAD_3RD_PARTY path variable)"
             )
 
@@ -129,7 +129,7 @@ class impart_backend:
         for text in args:
             self.print_buffer = self.print_buffer + str(text) + "\n"
 
-    def __find_new_file__(self):
+    def __find_new_file__(self, prefix=""):
         path = self.config.get_SRC_PATH()
         lib_name = self.config.get_LIB_NAME()
 
@@ -143,6 +143,7 @@ class impart_backend:
                     overwrite_if_exists=self.overwriteImport,
                     import_old_format=self.import_old_format,
                     library_name=lib_name,
+                    prefix=prefix,
                 )
                 self.print2buffer("[info] " + res)
             except AssertionError as e:
@@ -188,14 +189,15 @@ class impart_backend:
 
 backend_h = impart_backend()
 
-
-def checkImport(add_if_possible=True):
+# This function checks if the environment is correctly configured for this plugin
+def check_setup_correctness(add_if_possible=True, prefix=""):
     LIB_NAME = backend_h.config.get_LIB_NAME()
     libnames = [LIB_NAME]
     setting = backend_h.KiCad_Settings
     DEST_PATH = backend_h.config.get_DEST_PATH()
 
-    msg = ""
+    # Check if KICAD_3RD_PARTY envvar already exists
+    msg = "[info] "
     msg += setting.check_GlobalVar(DEST_PATH, add_if_possible)
 
     for name in libnames:
@@ -209,18 +211,21 @@ def checkImport(add_if_possible=True):
         libdir_convert_lib = os.path.join(DEST_PATH, name + "_old_lib.kicad_sym")
         if os.path.isfile(libdir):
             libname = name + ".kicad_sym"
-            msg += setting.check_symbollib(libname, add_if_possible)
+            msg += setting.check_symbollib(libname, add_if_possible, prefix)
         elif os.path.isfile(libdir_old):
             libname = name + "_kicad_sym.kicad_sym"
-            msg += setting.check_symbollib(libname, add_if_possible)
+            msg += setting.check_symbollib(libname, add_if_possible, prefix)
 
         if os.path.isfile(libdir_convert_lib):
             libname = name + "_old_lib.kicad_sym"
-            msg += setting.check_symbollib(libname, add_if_possible)
+            msg += setting.check_symbollib(libname, add_if_possible, prefix)
 
         libdir = os.path.join(DEST_PATH, name + ".pretty")
         if os.path.isdir(libdir):
-            msg += setting.check_footprintlib(name, add_if_possible)
+            msg += setting.check_footprintlib(name, add_if_possible, prefix)
+
+    if msg == "[info] ":
+        msg=""
     return msg
 
 
@@ -242,7 +247,7 @@ class impart_frontend(impartGUI):
         if backend_h.runThread:
             self.m_button.Label = "Automatic import / Press to stop"
         else:
-            self.m_button.Label = "Start"
+            self.m_button.Label = "Import!"
 
         EVT_UPDATE(self, self.updateDisplay)
         self.Thread = PluginThread(self)  # only for text output
@@ -318,23 +323,28 @@ class impart_frontend(impartGUI):
 
             if backend_h.runThread:
                 backend_h.runThread = False
-                self.m_button.Label = "Start"
+                self.m_button.Label = "Import!"
                 return
 
             backend_h.runThread = False
-            backend_h.__find_new_file__()
-            self.m_button.Label = "Start"
+            # THIS IS WHERE THE ACTUAL ACTION TAKES PLACE
+            if len(prefix) > 0:
+                backend_h.__find_new_file__(prefix + '_')
+            else:
+                backend_h.__find_new_file__()
+            
+            self.m_button.Label = "Import!"
 
-            if backend_h.autoImport:
-                backend_h.runThread = True
-                self.m_button.Label = "Automatic import running / Press to stop"
-                x = Thread(target=backend_h.__find_new_file__, args=[])
-                x.start()
+            # if backend_h.autoImport:
+            #     backend_h.runThread = True
+            #     self.m_button.Label = "Automatic import running / Press to stop"
+            #     x = Thread(target=backend_h.__find_new_file__, args=[])
+            #     x.start()
 
             add_if_possible = False  # TODO This variable appears to automatically add directories if it does not exist. We will need more experimentation on this
-            msg = checkImport(add_if_possible)
+            msg = check_setup_correctness(add_if_possible, prefix)
             if msg:
-                msg += "\n\nMore information can be found in the README for the integration into KiCad.\n"
+                msg += "\n\n[warn] More information can be found in the README for the integration into KiCad.\n"
                 msg += "github.com/Steffen-W/Import-LIB-KiCad-Plugin"
                 msg += "\nSome configurations require a KiCad restart to be detected correctly."
 
@@ -459,13 +469,13 @@ class impart_frontend(impartGUI):
 
 class ActionImpartPlugin(pcbnew.ActionPlugin):
     def defaults(self):
-        self.set_LOGO()
+        self.set_LOGO(False)
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
         if current_dir not in sys.path:
             sys.path.append(current_dir)
 
-    def set_LOGO(self):
+    def set_LOGO(self, is_red):
         self.name = "KiCad Importer"
         self.category = "Import library files"
         self.description = (

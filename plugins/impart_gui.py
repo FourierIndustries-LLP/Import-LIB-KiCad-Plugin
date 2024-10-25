@@ -201,7 +201,6 @@ class impartGUI ( wx.Dialog ):
         self.Bind( wx.EVT_CLOSE, self.on_close )
         self.m_radioBox_source.Bind( wx.EVT_RADIOBOX, self.RadioBoxPressed )
         self.m_dirPicker_librarypath.Bind( wx.EVT_DIRPICKER_CHANGED, self.DirChange )
-        self.m_textCtrl_libname.Bind( wx.EVT_TEXT, self.DirChange )
         self.m_textCtrl_libname.Bind( wx.EVT_TEXT_ENTER, self.DirChange )
         self.m_button_migrate.Bind( wx.EVT_BUTTON, self.migrate_libs )
         self.m_button.Bind( wx.EVT_BUTTON, self.BottonClick )
@@ -219,7 +218,6 @@ class impartGUI ( wx.Dialog ):
 
     def DirChange( self, event ):
         event.Skip()
-
 
 
     def migrate_libs( self, event ):
