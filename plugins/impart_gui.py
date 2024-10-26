@@ -70,7 +70,7 @@ class impartGUI ( wx.Dialog ):
 
         fgSizer2.Add( self.m_staticText_zipfileloc, 0, wx.ALL, 5 )
 
-        self.m_dirPicker_sourcepath = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.Size( -1,-1 ), wx.FLP_DEFAULT_STYLE )
+        self.m_dirPicker_sourcepath = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"ZIP files (*.zip)|*.zip", wx.DefaultPosition, wx.Size( -1,-1 ), wx.FLP_DEFAULT_STYLE )
         self.m_dirPicker_sourcepath.SetMaxSize( wx.Size( -1,25 ) )
 
         fgSizer2.Add( self.m_dirPicker_sourcepath, 2, wx.ALL|wx.EXPAND, 5 )
