@@ -143,7 +143,7 @@ class import_lib:
 
             assert self.dcm_path and (
                 self.lib_path or self.lib_path_new
-            ), "Not in samacsys format"
+            ), "ZIP file is not in Samacsys format"
             remote_type = REMOTE_TYPES.Samacsys
             return (
                 self.dcm_path,
@@ -164,7 +164,7 @@ class import_lib:
 
             assert (
                 self.lib_path or self.lib_path_new
-            ) and self.footprint_path, "Not in ultralibrarian format"
+            ) and self.footprint_path, "ZIP file is not in Ultralibrarian format"
             remote_type = REMOTE_TYPES.UltraLibrarian
             return (
                 self.dcm_path,
@@ -187,7 +187,7 @@ class import_lib:
 
             assert (
                 self.lib_path or self.lib_path_new
-            ) and self.footprint_path, "Not in Snapeda format"
+            ) and self.footprint_path, "ZIP file is not in SnapEDA format"
             return (
                 self.dcm_path,
                 self.lib_path,
@@ -197,9 +197,9 @@ class import_lib:
             )
 
         if footprint or self.lib_path_new:
-            assert False, "Unknown library zipfile"
+            assert False, "Unknown ZIP file format"
         else:
-            assert False, "zipfile is probably not a library to import"
+            assert False, "Invalid ZIP file"
 
     def import_dcm(
         self,
@@ -269,7 +269,7 @@ class import_lib:
                     if datasheet:
                         dcm_attributes[attribute_idx] = "F " + datasheet
         if index_end is None:
-            self.print("[error] DCM index_end not found")
+            self.print(f"[error] DCM index_end not found in {dcm_path.name}")
             raise Warning(device + "not found in " + dcm_path.name)
 
         dcm_file_read = self.DEST_PATH / (library_name + file_ending + ".dcm")
@@ -310,11 +310,11 @@ class import_lib:
                             if overwrite_if_exists:
                                 overwrite_existing = True
                                 self.print(
-                                    "[info] Importing and overwriting existing dcm..."
+                                    "[info] Importing and overwriting existing DCM..."
                                 )
                             else:
                                 overwrite_existing = False
-                                # self.print("Import of dcm skipped")
+                                self.print("[info] Import of DCM skipped")
                                 self.dcm_skipped = True
                                 return dcm_file_read, dcm_file_write
                             writefile.write(
@@ -328,7 +328,7 @@ class import_lib:
                             overwrite_existing = False
                     else:
                         writefile.write(line)
-
+        self.print("[info] DCM imported successfully")
         return dcm_file_read, dcm_file_write
 
     def import_model(
@@ -405,6 +405,7 @@ class import_lib:
 
             footprint_write_path = self.DEST_PATH / (library_name + ".pretty")
             footprint_file_read = footprint_write_path / footprint_path_item.name
+            # self.print(f'[debug] Footprint file read: {footprint_file_read}')
             footprint_file_write = footprint_write_path / (
                 footprint_path_item.name + "~"
             )
@@ -756,45 +757,50 @@ class import_lib:
         self.print("[info] Importing ZIP file: " + zip_file)
 
         with zipfile.ZipFile(zip_file) as zf:
-            (
-                dcm_path,
-                lib_path,
-                footprint_path,
-                model_path,
-                remote_type,
-            ) = self.get_remote_info(zf)
+            try:
+                (
+                    dcm_path,
+                    _, # lib_path, which is deprecated
+                    footprint_path,
+                    model_path,
+                    remote_type,
+                ) = self.get_remote_info(zf)
+            except Exception as e:
+                self.print("[error] Failed to import ZIP file, error: " + str(e))
+                raise e # rethrow the exception to stop the program
 
             self.print("[info]: ZIP file format identified as " + remote_type.name)
 
-            CompatibilityMode = False
-            if lib_path and not self.lib_path_new:
-                # If the symbol file is in the old format
-                CompatibilityMode = True
+            # # Do not attempt to convert old format Kicad. Old format is deprecated and this code will be removed in a future version of this plugin
+            # CompatibilityMode = False
+            # if lib_path and not self.lib_path_new:
+            #     # If the symbol file is in the old format
+            #     CompatibilityMode = True
 
-                temp_path = self.DEST_PATH / "temp.lib"
-                temp_path_new = self.DEST_PATH / "temp.kicad_sym"
+            #     temp_path = self.DEST_PATH / "temp.lib"
+            #     temp_path_new = self.DEST_PATH / "temp.kicad_sym"
 
-                if temp_path.exists():
-                    remove(temp_path)
-                if temp_path_new.exists():
-                    remove(temp_path_new)
+            #     if temp_path.exists():
+            #         remove(temp_path)
+            #     if temp_path_new.exists():
+            #         remove(temp_path_new)
 
-                with temp_path.open("wt", encoding="utf-8") as writefile:
-                    text = lib_path.read_text(encoding="utf-8")
-                    writefile.write(text)
+            #     with temp_path.open("wt", encoding="utf-8") as writefile:
+            #         text = lib_path.read_text(encoding="utf-8")
+            #         writefile.write(text)
 
-                if temp_path.exists() and cli.exists():
-                    cli.upgrade_sym_lib(temp_path, temp_path_new)
-                    self.print(
-                        "[info] Compatibility mode: automatically converting from .lib to .kicad_sym..."
-                    )
+            #     if temp_path.exists() and cli.exists():
+            #         cli.upgrade_sym_lib(temp_path, temp_path_new)
+            #         self.print(
+            #             "[info] Compatibility mode: automatically converting from .lib to .kicad_sym..."
+            #         )
 
-                if temp_path_new.exists() and temp_path_new.is_file():
-                    self.lib_path_new = temp_path_new
-                else:
-                    self.print(
-                        "[error] Failed to convert symbol library to new format!"
-                    )
+            #     if temp_path_new.exists() and temp_path_new.is_file():
+            #         self.lib_path_new = temp_path_new
+            #     else:
+            #         self.print(
+            #             "[error] Failed to convert symbol library to new format!"
+            #         )
 
             if self.lib_path_new:
                 # If the symbol file is in the new format
@@ -819,31 +825,32 @@ class import_lib:
                     library_name=library_name,
                     prefix=prefix
                 )
-                self.print("[info] DCM imported successfully")
+                
                 if not import_old_format:
                     lib_path = None
 
-            if CompatibilityMode:
-                if temp_path.exists():
-                    remove(temp_path)
-                if temp_path_new.exists():
-                    remove(temp_path_new)
+            # if CompatibilityMode:
+            #     if temp_path.exists():
+            #         remove(temp_path)
+            #     if temp_path_new.exists():
+            #         remove(temp_path_new)
 
-            if lib_path:
-                device, lib_file_read, lib_file_write = self.import_lib(
-                    remote_type,
-                    lib_path,
-                    overwrite_if_exists,
-                    library_name=library_name,
-                )
+            # Disabled old Kicad format imports
+            # if lib_path:
+            #     device, lib_file_read, lib_file_write = self.import_lib(
+            #         remote_type,
+            #         lib_path,
+            #         overwrite_if_exists,
+            #         library_name=library_name,
+            #     )
 
-                dcm_file_read, dcm_file_write = self.import_dcm(
-                    device,
-                    remote_type,
-                    dcm_path,
-                    overwrite_if_exists,
-                    library_name=library_name,
-                )
+            #     dcm_file_read, dcm_file_write = self.import_dcm(
+            #         device,
+            #         remote_type,
+            #         dcm_path,
+            #         overwrite_if_exists,
+            #         library_name=library_name,
+            #     )
 
             found_model = self.import_model(
                 model_path, remote_type, overwrite_if_exists, library_name=library_name
@@ -867,16 +874,16 @@ class import_lib:
                 elif dcm_file_new_write.exists():
                     remove(dcm_file_new_write)
 
-            if lib_path:
-                if dcm_file_write.exists() and not self.dcm_skipped:
-                    dcm_file_write.replace(dcm_file_read)
-                elif dcm_file_write.exists():
-                    remove(dcm_file_write)
+            # if lib_path:
+            #     if dcm_file_write.exists() and not self.dcm_skipped:
+            #         dcm_file_write.replace(dcm_file_read)
+            #     elif dcm_file_write.exists():
+            #         remove(dcm_file_write)
 
-                if lib_file_write.exists() and not self.lib_skipped:
-                    lib_file_write.replace(lib_file_read)
-                elif lib_file_write.exists():
-                    remove(lib_file_write)
+            #     if lib_file_write.exists() and not self.lib_skipped:
+            #         lib_file_write.replace(lib_file_read)
+            #     elif lib_file_write.exists():
+            #         remove(lib_file_write)
 
             # Check if footprint name matches symbol name, and if not, append the symbol name in front
             if (

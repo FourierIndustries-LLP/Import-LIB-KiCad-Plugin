@@ -384,87 +384,87 @@ class impart_frontend(impartGUI):
         else:
             self.m_button_migrate.Hide()
 
-    def migrate_libs(self, event):
-        libs2migrate = self.get_old_libfiles()
+    # def migrate_libs(self, event):
+    #     libs2migrate = self.get_old_libfiles()
 
-        conv = convert_lib_list(libs2migrate, drymode=True)
+    #     conv = convert_lib_list(libs2migrate, drymode=True)
 
-        def print2GUI(text):
-            backend_h.print2buffer(text)
+    #     def print2GUI(text):
+    #         backend_h.print2buffer(text)
 
-        if len(conv) <= 0:
-            print2GUI("Error in migrate_libs()")
-            return
+    #     if len(conv) <= 0:
+    #         print2GUI("Error in migrate_libs()")
+    #         return
 
-        SymbolTable = backend_h.KiCad_Settings.get_sym_table()
-        SymbolLibsUri = {lib["uri"]: lib for lib in SymbolTable}
-        libRename = []
+    #     SymbolTable = backend_h.KiCad_Settings.get_sym_table()
+    #     SymbolLibsUri = {lib["uri"]: lib for lib in SymbolTable}
+    #     libRename = []
 
-        def lib_entry(lib):
-            return "${KICAD_3RD_PARTY}/" + lib
+    #     def lib_entry(lib):
+    #         return "${KICAD_3RD_PARTY}/" + lib
 
-        msg = ""
-        for line in conv:
-            if line[1].endswith(".blk"):
-                msg += "\n" + line[0] + " rename to " + line[1]
-            else:
-                msg += "\n" + line[0] + " convert to " + line[1]
-                if lib_entry(line[0]) in SymbolLibsUri:
-                    entry = SymbolLibsUri[lib_entry(line[0])]
-                    tmp = {
-                        "oldURI": entry["uri"],
-                        "newURI": lib_entry(line[1]),
-                        "name": entry["name"],
-                    }
-                    libRename.append(tmp)
+    #     msg = ""
+    #     for line in conv:
+    #         if line[1].endswith(".blk"):
+    #             msg += "\n" + line[0] + " rename to " + line[1]
+    #         else:
+    #             msg += "\n" + line[0] + " convert to " + line[1]
+    #             if lib_entry(line[0]) in SymbolLibsUri:
+    #                 entry = SymbolLibsUri[lib_entry(line[0])]
+    #                 tmp = {
+    #                     "oldURI": entry["uri"],
+    #                     "newURI": lib_entry(line[1]),
+    #                     "name": entry["name"],
+    #                 }
+    #                 libRename.append(tmp)
 
-        msg_lib = ""
-        if len(libRename):
-            msg_lib += "The following changes must be made to the list of imported Symbol libs:\n"
+    #     msg_lib = ""
+    #     if len(libRename):
+    #         msg_lib += "The following changes must be made to the list of imported Symbol libs:\n"
 
-            for tmp in libRename:
-                msg_lib += f"\n{tmp['name']} : {tmp['oldURI']} \n-> {tmp['newURI']}"
+    #         for tmp in libRename:
+    #             msg_lib += f"\n{tmp['name']} : {tmp['oldURI']} \n-> {tmp['newURI']}"
 
-            msg_lib += "\n\n"
-            msg_lib += "It is necessary to adjust the settings of the imported symbol libraries in KiCad."
-            msg += "\n\n" + msg_lib
+    #         msg_lib += "\n\n"
+    #         msg_lib += "It is necessary to adjust the settings of the imported symbol libraries in KiCad."
+    #         msg += "\n\n" + msg_lib
 
-        msg += "\n\nBackup files are also created automatically. "
-        msg += "These are named '*.blk'.\nShould the changes be applied?"
+    #     msg += "\n\nBackup files are also created automatically. "
+    #     msg += "These are named '*.blk'.\nShould the changes be applied?"
 
-        dlg = wx.MessageDialog(
-            None, msg, "WARNING", wx.KILL_OK | wx.ICON_WARNING | wx.CANCEL
-        )
-        if dlg.ShowModal() == wx.ID_OK:
-            print2GUI("Converted libraries:")
-            conv = convert_lib_list(libs2migrate, drymode=False)
-            for line in conv:
-                if line[1].endswith(".blk"):
-                    print2GUI(line[0] + " rename to " + line[1])
-                else:
-                    print2GUI(line[0] + " convert to " + line[1])
-        else:
-            return
+    #     dlg = wx.MessageDialog(
+    #         None, msg, "WARNING", wx.KILL_OK | wx.ICON_WARNING | wx.CANCEL
+    #     )
+    #     if dlg.ShowModal() == wx.ID_OK:
+    #         print2GUI("Converted libraries:")
+    #         conv = convert_lib_list(libs2migrate, drymode=False)
+    #         for line in conv:
+    #             if line[1].endswith(".blk"):
+    #                 print2GUI(line[0] + " rename to " + line[1])
+    #             else:
+    #                 print2GUI(line[0] + " convert to " + line[1])
+    #     else:
+    #         return
 
-        if not len(msg_lib):
-            return
+    #     if not len(msg_lib):
+    #         return
 
-        msg_dlg = "\nShould the change be made automatically? A restart of KiCad is then necessary to apply all changes."
-        dlg2 = wx.MessageDialog(
-            None, msg_lib + msg_dlg, "WARNING", wx.KILL_OK | wx.ICON_WARNING | wx.CANCEL
-        )
-        if dlg2.ShowModal() == wx.ID_OK:
-            for tmp in libRename:
-                print2GUI(f"\n{tmp['name']} : {tmp['oldURI']} \n-> {tmp['newURI']}")
-                backend_h.KiCad_Settings.sym_table_change_entry(
-                    tmp["oldURI"], tmp["newURI"]
-                )
-            print2GUI("\nA restart of KiCad is then necessary to apply all changes.")
-        else:
-            print2GUI(msg_lib)
+    #     msg_dlg = "\nShould the change be made automatically? A restart of KiCad is then necessary to apply all changes."
+    #     dlg2 = wx.MessageDialog(
+    #         None, msg_lib + msg_dlg, "WARNING", wx.KILL_OK | wx.ICON_WARNING | wx.CANCEL
+    #     )
+    #     if dlg2.ShowModal() == wx.ID_OK:
+    #         for tmp in libRename:
+    #             print2GUI(f"\n{tmp['name']} : {tmp['oldURI']} \n-> {tmp['newURI']}")
+    #             backend_h.KiCad_Settings.sym_table_change_entry(
+    #                 tmp["oldURI"], tmp["newURI"]
+    #             )
+    #         print2GUI("\nA restart of KiCad is then necessary to apply all changes.")
+    #     else:
+    #         print2GUI(msg_lib)
 
-        self.test_migrate_possible()  # When everything has worked, the button disappears
-        event.Skip()
+    #     self.test_migrate_possible()  # When everything has worked, the button disappears
+    #     event.Skip()
 
 
 class ActionImpartPlugin(pcbnew.ActionPlugin):
