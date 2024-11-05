@@ -272,9 +272,9 @@ class import_lib:
             self.print(f"[error] DCM index_end not found in {dcm_path.name}")
             raise Warning(device + "not found in " + dcm_path.name)
 
-        dcm_file_read = self.DEST_PATH / (library_name + file_ending + ".dcm")
+        dcm_file_read = self.DEST_PATH / library_name / (library_name + file_ending + ".dcm")
 
-        dcm_file_write = self.DEST_PATH / (library_name + ".dcm~")
+        dcm_file_write = self.DEST_PATH / library_name / (library_name + ".dcm~")
         overwrite_existing = overwrote_existing = False
 
         check_file(dcm_file_read)
@@ -345,7 +345,7 @@ class import_lib:
         if not model_path:
             return False
 
-        write_file = self.DEST_PATH / (library_name + ".3dshapes") / model_path.name
+        write_file = self.DEST_PATH / library_name / (library_name + ".3dshapes") / model_path.name
 
         self.model_skipped = False
 
@@ -403,7 +403,7 @@ class import_lib:
         if footprint_path_item.name.endswith("mod"):
             footprint = footprint_path_item.read_text(encoding="utf-8")
 
-            footprint_write_path = self.DEST_PATH / (library_name + ".pretty")
+            footprint_write_path = self.DEST_PATH / library_name / (library_name + ".pretty")
             footprint_file_read = footprint_write_path / footprint_path_item.name
             # self.print(f'[debug] Footprint file read: {footprint_file_read}')
             footprint_file_write = footprint_write_path / (
@@ -527,8 +527,8 @@ class import_lib:
         if index_end is None:
             raise Warning(device + " not found in " + lib_path.name)
 
-        lib_file_read = self.DEST_PATH / (library_name + ".lib")
-        lib_file_write = self.DEST_PATH / (library_name + ".lib~")
+        lib_file_read = self.DEST_PATH / library_name / (library_name + ".lib")
+        lib_file_write = self.DEST_PATH / library_name / (library_name + ".lib~")
         overwrite_existing = overwrote_existing = overwritten = False
 
         check_file(lib_file_read)
@@ -691,9 +691,9 @@ class import_lib:
             # get the symbol name, which is the first entry in quotes
             symbol_name = extract_symbol_names(symbol_section)[0]
 
-        lib_file_read = self.DEST_PATH / (library_name + ".kicad_sym")
-        lib_file_read_old = self.DEST_PATH / (library_name + "_kicad_sym.kicad_sym")
-        lib_file_write = self.DEST_PATH / (library_name + ".kicad_sym~")
+        lib_file_read = self.DEST_PATH / library_name / (library_name + ".kicad_sym")
+        lib_file_read_old = self.DEST_PATH / library_name / (library_name + "_kicad_sym.kicad_sym")
+        lib_file_write = self.DEST_PATH / library_name / (library_name + ".kicad_sym~")
         if isfile(lib_file_read_old) and not isfile(lib_file_read):
             lib_file_read = lib_file_read_old
 
@@ -777,8 +777,8 @@ class import_lib:
             #     # If the symbol file is in the old format
             #     CompatibilityMode = True
 
-            #     temp_path = self.DEST_PATH / "temp.lib"
-            #     temp_path_new = self.DEST_PATH / "temp.kicad_sym"
+            #     temp_path = self.DEST_PATH / library_name / "temp.lib"
+            #     temp_path_new = self.DEST_PATH / library_name / "temp.kicad_sym"
 
             #     if temp_path.exists():
             #         remove(temp_path)

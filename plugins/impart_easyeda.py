@@ -188,7 +188,7 @@ class easyeda2kicad_wrapper:
 
         # Base folder is the full absolute path to the folder
         # lib_name is the name of the library itself, for the kicad_sym files and footprint .pretty folder
-        output = f"{base_folder}/{lib_name}"
+        output = f"{base_folder}/{lib_name}/{lib_name}"
 
         lib_var = "KICAD_3RD_PARTY"
 
