@@ -75,7 +75,7 @@ where `My_Library_1` is the name of your library.
 
 **Step 3**: Add the footprint library
 
-Finally, press the Manage Footprint Library button to  bring up the Footprint Libraries window and press + to add the library name you want. The format of the library path must be
+Finally, press the Manage Footprint Library button to bring up the Footprint Libraries window and press + to add the library name you want. The format of the library path must be
 
 ```
 ${KICAD_3RD_PARTY}/My_Library_1/My_Library_1.pretty
@@ -88,15 +88,33 @@ where `My_Library_1` is the name of your library.
 
 ### Adding a Samacsys/SnapEDA/Ultralibrarian/Octopart symbol/footprint ZIP file
 
-Most symbols or footprints come from ZIP files made by these major ECAD component libraries. 
+Most symbols or footprints come from ZIP files made by these major ECAD component libraries. You can directly import those files as complete packages.
+
+**Step 1**: Download the part from the source in the ZIP format
+
+<img src="doc/image-3.png" width=50% />
+
+**Step 2**: Open pcbnew (PCB editor interface) and click on the download icon to bring up the plugin
+
+<img src="doc/image-4.png" width=50% />
+
+**Step 3**: Make sure the radio button for the (manually download zip file) option is enabled, and select the zip file. Set a prefix if any, following the KiCad Library Convention (KLC) for naming symbols (e.g. Regulator_Linear_TI). Set the name of your library (e.g. `My_Library_1`), which is contained inside the `KICAD_3RD_PARTY` folder which you also have to specify here.
+
+<img src="doc/image-5.png" width=33% />
+
+**Step 4**: Press "Import!" and you're done!
 
 ### Adding an LCSC symbol/footprint
+
+LCSC provides symbols, footprints and 3D models for most of their inventory, especially on specialty Chinese parts not available with Western distributors (e.g. Digikey). 
 
 
 ### After adding the symbol/footprint
 
 You should do your best to clean up the symbol and footprints after they have been imported into your library. Follow your organisations best practises, but some of the practises that we employ are:
 
+- Double check the 3D model orientation, or import a relevant 3D model if it's not present in the ZIP file: this ensures the 3D model looks correct in the final model.
+- Make sure that both the symbol and footprint has the correct prefix, which makes it easier to find specific components in the library.
 
 
 ## Caveats
