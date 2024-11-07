@@ -113,8 +113,8 @@ class easyeda2kicad_wrapper:
         footprint_path = f"{output}.pretty"
         # model_3d_path = f"{output}.3dshapes".replace("\\", "/").replace("./", "/")
 
-        # The path should look like ${KICAD_3RD_PARTY}/TESTING_library.3dshapes/TQFP-64_L10.0-W10.0-H1.2-LS12.0-P0.50.wrl
-        model_3d_path = f"${{{lib_path_var}}}/{lib_name}.3dshapes"
+        # The path should look like ${KICAD_3RD_PARTY}/TESTING_library/TESTING_library.3dshapes/TQFP-64_L10.0-W10.0-H1.2-LS12.0-P0.50.wrl
+        model_3d_path = f"${{{lib_path_var}}}/{lib_name}/{lib_name}.3dshapes"
 
         ki_footprint.export(
             footprint_full_path=f"{footprint_path}/{footprint_filename}",

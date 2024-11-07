@@ -415,6 +415,7 @@ class import_lib:
                 model = [
                     '  (model "'
                     + "${KICAD_3RD_PARTY}/"
+                    + f"{library_name}/"
                     + library_name
                     + ".3dshapes/"
                     + found_model.name
