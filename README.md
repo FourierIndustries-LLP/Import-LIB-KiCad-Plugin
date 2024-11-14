@@ -10,7 +10,7 @@
 
 This plugin is a fork of the highly popular [Import-LIB-KiCad-Plugin](https://github.com/Steffen-W/Import-LIB-KiCad-Plugin), with an improved UI designed for a more professional KiCad library management workflow.
 
-Download the plugin [here]()!
+Download the plugin [here](https://github.com/FourierIndustries-LLP/Import-LIB-KiCad-Plugin/raw/refs/heads/master/Import-LIB-KiCad-Plugin.zip)!
 
 ## Design Philosophy
 
