@@ -10,6 +10,8 @@
 
 This plugin is a fork of the highly popular [Import-LIB-KiCad-Plugin](https://github.com/Steffen-W/Import-LIB-KiCad-Plugin), with an improved UI designed for a more professional KiCad library management workflow.
 
+Download the plugin [here]()!
+
 ## Design Philosophy
 
 One of the major reasons why we forked the original plugin was the desire to create a library management framework for a collaborative, decentralised and shared KiCad library across a small to medium-sized organisation with standards based on the 3 Es:
@@ -38,7 +40,7 @@ Install this plugin using the KiCad Package Content Manager (PCM) with the "Inst
 
 **Step 1**: Click on Configure Paths and add a new environment variable called `KICAD_3RD_PARTY`. This should be the folder where all of your third party libraries are placed.
 
-<img src="doc/image.png" width=33% />
+<img src="doc/image.png" width=66% />
 
 The folder structure inside `KICAD_3RD_PARTY` should look something like this:
 
@@ -70,7 +72,7 @@ ${KICAD_3RD_PARTY}/My_Library_1/My_Library_1.kicad_sym
 
 where `My_Library_1` is the name of your library. 
 
-<img src="doc/image-1.png" width=50% />
+<img src="doc/image-1.png" width=66% />
 
 
 **Step 3**: Add the footprint library
@@ -83,7 +85,7 @@ ${KICAD_3RD_PARTY}/My_Library_1/My_Library_1.pretty
 
 where `My_Library_1` is the name of your library. 
 
-<img src="doc/image-2.png" width=50% />
+<img src="doc/image-2.png" width=66% />
 
 
 ### Adding a Samacsys/SnapEDA/Ultralibrarian/Octopart symbol/footprint ZIP file
@@ -92,21 +94,23 @@ Most symbols or footprints come from ZIP files made by these major ECAD componen
 
 **Step 1**: Download the part from the source in the ZIP format
 
-<img src="doc/image-3.png" width=50% />
+<img src="doc/image-3.png" width=66% />
 
 **Step 2**: Open pcbnew (PCB editor interface) and click on the download icon to bring up the plugin
 
-<img src="doc/image-4.png" width=50% />
+<img src="doc/image-4.png" width=66% />
 
 **Step 3**: Make sure the radio button for the (manually download zip file) option is enabled, and select the zip file. Set a prefix if any, following the KiCad Library Convention (KLC) for naming symbols (e.g. Regulator_Linear_TI). Set the name of your library (e.g. `My_Library_1`), which is contained inside the `KICAD_3RD_PARTY` folder which you also have to specify here.
 
-<img src="doc/image-5.png" width=33% />
+<img src="doc/image-5.png" width=66% />
 
 **Step 4**: Press "Import!" and you're done!
 
 ### Adding an LCSC symbol/footprint
 
 LCSC provides symbols, footprints and 3D models for most of their inventory, especially on specialty Chinese parts not available with Western distributors (e.g. Digikey). 
+
+Simply select the LCSC radio button and key in the LCSC part number (that starts with a C), set your prefixes / library names and press Import!
 
 
 ### After adding the symbol/footprint
