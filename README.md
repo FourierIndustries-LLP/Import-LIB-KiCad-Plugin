@@ -5,7 +5,7 @@
 > Easy to use KiCad library importer with a professional workflow
 
 <div style="overflow:hidden; margin-top: 20px; margin-bottom: 20px;" align="center">
-<img src="https://media.karousell.com/media/photos/profiles/2022/04/21/_1650518116_7c47db2b.jpg" style="margin:-16.5% 0px -17% 0px;" \>
+<img src="doc/FI_logo.jpeg" \>
 </div>
 
 This plugin is a fork of the highly popular [Import-LIB-KiCad-Plugin](https://github.com/Steffen-W/Import-LIB-KiCad-Plugin), with an improved UI designed for a more professional KiCad library management workflow.
