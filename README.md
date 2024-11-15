@@ -5,7 +5,7 @@
 > Easy to use KiCad library importer with a professional workflow
 
 <div style="overflow:hidden; margin-top: 20px; margin-bottom: 20px;" align="center">
-<img src="doc/FI_logo.jpeg" \>
+<img src="doc/FI_logo.jpeg" />
 </div>
 
 This plugin is a fork of the highly popular [Import-LIB-KiCad-Plugin](https://github.com/Steffen-W/Import-LIB-KiCad-Plugin), with an improved UI designed for a more professional KiCad library management workflow.
@@ -32,9 +32,7 @@ All of the symbols, footprints and 3D models are placed in one custom-named libr
 
 Install this plugin using the KiCad Package Content Manager (PCM) with the "Install from File..." option.
 
-## Usage
-
-### Initial Setup
+## Setup
 
 > Initial setup is **very important**!! This plugin will not work if initial setup is not carried out.
 
@@ -87,6 +85,7 @@ where `My_Library_1` is the name of your library.
 
 <img src="doc/image-2.png" width=66% />
 
+## Usage
 
 ### Adding a Samacsys/SnapEDA/Ultralibrarian/Octopart symbol/footprint ZIP file
 
@@ -119,6 +118,15 @@ You should do your best to clean up the symbol and footprints after they have be
 
 - Double check the 3D model orientation, or import a relevant 3D model if it's not present in the ZIP file: this ensures the 3D model looks correct in the final model.
 - Make sure that both the symbol and footprint has the correct prefix, which makes it easier to find specific components in the library.
+
+
+### Updating this plugin
+
+If you need to update this plugin, follow the instructions below:
+
+1. Uninstall the plugin using the Package Content Manager (PCM)
+2. Install the plugin using the new ZIP file downloaded from this repository using the PCM
+3. Restart KiCad (this part is **SUPER important**! old cached files may still be present if KiCad is not restarted)
 
 
 ## Caveats
