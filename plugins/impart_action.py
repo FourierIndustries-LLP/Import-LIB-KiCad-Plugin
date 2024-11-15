@@ -5,7 +5,7 @@ from time import sleep
 from threading import Thread
 import sys
 import traceback
-from impart_easyeda import easyeda2kicad_wrapper
+import importlib.util
 
 
 """
@@ -257,6 +257,8 @@ class impart_frontend(impartGUI):
     def updateDisplay(self, status):
         self.m_text.SetValue(status.data)
         self.m_text.SetInsertionPointEnd()
+        # self.m_text.SetScrollPos(wx.VERTICAL, self.m_text.GetScrollRange(wx.VERTICAL))
+        # self.m_text.SetInsertionPoint(-1)
 
     # def print(self, text):
     #     self.m_text.AppendText(str(text)+"\n")
@@ -291,29 +293,39 @@ class impart_frontend(impartGUI):
         selection = self.m_radioBox_source.GetSelection()  # 0=zip import, 1=lcsc
         # TODO: add prefix to part numbers
         if selection == 1:
-            try:
-                component_id = (
-                    self.m_textCtrl_lcsc_number.GetValue().strip()
-                )  # example: "C2040"
-                overwrite = self.m_overwrite.IsChecked()
-                backend_h.print2buffer(
-                    "[info] Attempting to import EasyEDA / LCSC Part# : " + component_id
-                )
-                base_folder = backend_h.config.get_DEST_PATH()
-                easyeda_import = easyeda2kicad_wrapper()
-                easyeda_import.print = backend_h.print2buffer
-                easyeda_import.full_import(
-                    component_id,
-                    base_folder,
-                    overwrite,
-                    str(self.m_textCtrl_libname.GetValue()),
-                    prefix
-                )
-                event.Skip()
-            except Exception as e:
-                backend_h.print2buffer(f"[error] {e}")
-                backend_h.print2buffer("Python version " + sys.version)
-                print(traceback.format_exc())
+            # pydantic
+            pydantic_spec = importlib.util.find_spec("pydantic")
+            found_pydantic = pydantic_spec is not None
+            if found_pydantic:
+                try:
+                    from impart_easyeda import easyeda2kicad_wrapper
+                    component_id = (
+                        self.m_textCtrl_lcsc_number.GetValue().strip()
+                    )  # example: "C2040"
+                    overwrite = self.m_overwrite.IsChecked()
+                    backend_h.print2buffer(
+                        "[info] Attempting to import EasyEDA / LCSC Part# : " + component_id
+                    )
+                    base_folder = backend_h.config.get_DEST_PATH()
+                    easyeda_import = easyeda2kicad_wrapper()
+                    easyeda_import.print = backend_h.print2buffer
+                    easyeda_import.full_import(
+                        component_id,
+                        base_folder,
+                        overwrite,
+                        str(self.m_textCtrl_libname.GetValue()),
+                        prefix
+                    )
+                    event.Skip()
+                except Exception as e:
+                    backend_h.print2buffer(f"[error] {e}")
+                    backend_h.print2buffer("Python version " + sys.version)
+                    print(traceback.format_exc())
+            else:
+                backend_h.print2buffer("[error] the pydantic package is not installed! Please install it using the following commands:")
+                backend_h.print2buffer("For macOS: /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/pip3.9 install pydantic")
+                backend_h.print2buffer("For Windows (Local Installation): %LOCALAPPDATA%\Programs\KiCad\8.0\\bin\python.exe -m pip install pydantic")
+                backend_h.print2buffer("For more information, see https://github.com/Steffen-W/Import-LIB-KiCad-Plugin/issues/23")
         else:
             backend_h.config.set_SRC_PATH(self.m_dirPicker_sourcepath.GetPath())
             backend_h.config.set_DEST_PATH(self.m_dirPicker_librarypath.GetPath())
