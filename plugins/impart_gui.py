@@ -17,7 +17,7 @@ import wx.xrc
 class impartGUI ( wx.Dialog ):
 
     def __init__( self, parent ):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"KiCad Importer", pos = wx.DefaultPosition, size = wx.Size( 655,607 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.BORDER_DEFAULT )
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"KiCad Importer", pos = wx.DefaultPosition, size = wx.Size( 655,618 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.BORDER_DEFAULT )
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
@@ -27,11 +27,14 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText_librarypath2 = wx.StaticText( self, wx.ID_ANY, u"Console", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_librarypath2.Wrap( -1 )
 
-        self.m_staticText_librarypath2.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
+        self.m_staticText_librarypath2.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
 
         bSizer.Add( self.m_staticText_librarypath2, 0, wx.ALL, 5 )
 
         self.m_text = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_BESTWRAP|wx.TE_MULTILINE|wx.TE_READONLY )
+        self.m_text.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+        self.m_text.SetMinSize( wx.Size( -1,100 ) )
+
         bSizer.Add( self.m_text, 0, wx.ALL|wx.EXPAND, 5 )
 
         self.m_staticline11 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
@@ -50,13 +53,15 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"Source of Import", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText7.Wrap( -1 )
 
-        self.m_staticText7.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
+        self.m_staticText7.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
 
         bSizer.Add( self.m_staticText7, 0, wx.ALL, 5 )
 
         m_radioBox_sourceChoices = [ u"SamacSys / Ultralibrarian / Octopart / SnapEDA (manually download zip file)", u"LCSC (key in LCSC part no.)" ]
         self.m_radioBox_source = wx.RadioBox( self, wx.ID_ANY, u"Source", wx.DefaultPosition, wx.DefaultSize, m_radioBox_sourceChoices, 1, wx.RA_SPECIFY_COLS )
         self.m_radioBox_source.SetSelection( 0 )
+        self.m_radioBox_source.SetFont( wx.Font( 14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+
         bSizer.Add( self.m_radioBox_source, 0, wx.ALIGN_CENTER_HORIZONTAL, 0 )
 
         fgSizer2 = wx.FlexGridSizer( 2, 2, 0, 0 )
@@ -68,9 +73,12 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText_zipfileloc = wx.StaticText( self, wx.ID_ANY, u"Zip File Location", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_zipfileloc.Wrap( -1 )
 
+        self.m_staticText_zipfileloc.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+
         fgSizer2.Add( self.m_staticText_zipfileloc, 0, wx.ALL, 5 )
 
         self.m_dirPicker_sourcepath = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"ZIP files (*.zip)|*.zip", wx.DefaultPosition, wx.Size( -1,-1 ), wx.FLP_DEFAULT_STYLE )
+        self.m_dirPicker_sourcepath.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
         self.m_dirPicker_sourcepath.SetMaxSize( wx.Size( -1,25 ) )
 
         fgSizer2.Add( self.m_dirPicker_sourcepath, 2, wx.ALL|wx.EXPAND, 5 )
@@ -78,9 +86,12 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText_lcscpartno = wx.StaticText( self, wx.ID_ANY, u"LCSC Part Number (e.g. C4030)", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_lcscpartno.Wrap( -1 )
 
+        self.m_staticText_lcscpartno.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+
         fgSizer2.Add( self.m_staticText_lcscpartno, 0, wx.ALL, 5 )
 
         self.m_textCtrl_lcsc_number = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TE_PROCESS_ENTER )
+        self.m_textCtrl_lcsc_number.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
         self.m_textCtrl_lcsc_number.SetMaxSize( wx.Size( -1,25 ) )
 
         fgSizer2.Add( self.m_textCtrl_lcsc_number, 2, wx.ALL|wx.EXPAND, 5 )
@@ -97,7 +108,7 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText_sourcepath = wx.StaticText( self, wx.ID_ANY, u"Import Parameters", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_sourcepath.Wrap( -1 )
 
-        self.m_staticText_sourcepath.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
+        self.m_staticText_sourcepath.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
 
         bSizer.Add( self.m_staticText_sourcepath, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
@@ -110,9 +121,12 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, u"Optional Prefix (e.g. \"MCU_Atmel\")", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText13.Wrap( -1 )
 
+        self.m_staticText13.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+
         fgSizer11.Add( self.m_staticText13, 0, wx.ALL, 5 )
 
         self.m_textCtrl_prefix = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl_prefix.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
         self.m_textCtrl_prefix.SetMaxSize( wx.Size( -1,25 ) )
 
         fgSizer11.Add( self.m_textCtrl_prefix, 0, wx.ALL|wx.EXPAND, 5 )
@@ -129,11 +143,13 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText_sourcepath1 = wx.StaticText( self, wx.ID_ANY, u"Output Parameters", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_sourcepath1.Wrap( -1 )
 
-        self.m_staticText_sourcepath1.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
+        self.m_staticText_sourcepath1.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, wx.EmptyString ) )
 
         bSizer.Add( self.m_staticText_sourcepath1, 0, wx.ALL, 5 )
 
         self.m_overwrite = wx.CheckBox( self, wx.ID_ANY, u"Overwrite existing entry in library", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_overwrite.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+
         bSizer.Add( self.m_overwrite, 0, wx.ALL, 5 )
 
         fgSizer21 = wx.FlexGridSizer( 2, 2, 0, 0 )
@@ -145,11 +161,12 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText_librarypath = wx.StaticText( self, wx.ID_ANY, u"Library location (same as ${KICAD_3RD_PARTY}):", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_librarypath.Wrap( -1 )
 
-        self.m_staticText_librarypath.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+        self.m_staticText_librarypath.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
 
         fgSizer21.Add( self.m_staticText_librarypath, 0, wx.ALL, 5 )
 
         self.m_dirPicker_librarypath = wx.DirPickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a folder", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE )
+        self.m_dirPicker_librarypath.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
         self.m_dirPicker_librarypath.SetMaxSize( wx.Size( -1,25 ) )
 
         fgSizer21.Add( self.m_dirPicker_librarypath, 0, wx.ALL|wx.EXPAND, 5 )
@@ -157,9 +174,12 @@ class impartGUI ( wx.Dialog ):
         self.m_staticText_librarypath1 = wx.StaticText( self, wx.ID_ANY, u"Library name", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText_librarypath1.Wrap( -1 )
 
+        self.m_staticText_librarypath1.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+
         fgSizer21.Add( self.m_staticText_librarypath1, 0, wx.ALL, 5 )
 
         self.m_textCtrl_libname = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl_libname.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
         self.m_textCtrl_libname.SetMaxSize( wx.Size( -1,25 ) )
 
         fgSizer21.Add( self.m_textCtrl_libname, 0, wx.ALL|wx.EXPAND, 5 )
@@ -189,6 +209,8 @@ class impartGUI ( wx.Dialog ):
         bSizer.Add( self.m_button_migrate, 0, wx.ALL|wx.EXPAND, 5 )
 
         self.m_button = wx.Button( self, wx.ID_ANY, u"Import!", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+
         bSizer.Add( self.m_button, 0, wx.ALL|wx.EXPAND, 5 )
 
 
