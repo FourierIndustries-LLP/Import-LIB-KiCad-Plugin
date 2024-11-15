@@ -192,7 +192,6 @@ backend_h = impart_backend()
 # This function checks if the environment is correctly configured for this plugin
 def check_setup_correctness(add_if_possible=True, prefix=""):
     LIB_NAME = backend_h.config.get_LIB_NAME()
-    libnames = [LIB_NAME]
     setting = backend_h.KiCad_Settings
     DEST_PATH = backend_h.config.get_DEST_PATH()
 
@@ -200,29 +199,29 @@ def check_setup_correctness(add_if_possible=True, prefix=""):
     msg = "[info] "
     msg += setting.check_GlobalVar(DEST_PATH, add_if_possible)
 
-    for name in libnames:
-        # The lines work but old libraries should not be added automatically
-        # libname = os.path.join(DEST_PATH, name + ".lib")
-        # if os.path.isfile(libname):
-        #     msg += setting.check_symbollib(name + ".lib", add_if_possible)
+    # The lines work but old libraries should not be added automatically
+    # libname = os.path.join(DEST_PATH, name + ".lib")
+    # if os.path.isfile(libname):
+    #     msg += setting.check_symbollib(name + ".lib", add_if_possible)
 
-        libdir = os.path.join(DEST_PATH, name + ".kicad_sym")
-        libdir_old = os.path.join(DEST_PATH, name + "_kicad_sym.kicad_sym")
-        libdir_convert_lib = os.path.join(DEST_PATH, name + "_old_lib.kicad_sym")
-        if os.path.isfile(libdir):
-            libname = name + ".kicad_sym"
-            msg += setting.check_symbollib(libname, add_if_possible, prefix)
-        elif os.path.isfile(libdir_old):
-            libname = name + "_kicad_sym.kicad_sym"
-            msg += setting.check_symbollib(libname, add_if_possible, prefix)
+    sym_dir = os.path.join(DEST_PATH, LIB_NAME + ".kicad_sym")
+    sym_dir_old = os.path.join(DEST_PATH, LIB_NAME + "_kicad_sym.kicad_sym")
+    sym_dir_convert = os.path.join(DEST_PATH, LIB_NAME + "_old_lib.kicad_sym")
 
-        if os.path.isfile(libdir_convert_lib):
-            libname = name + "_old_lib.kicad_sym"
-            msg += setting.check_symbollib(libname, add_if_possible, prefix)
+    if os.path.isfile(sym_dir):
+        libname = LIB_NAME + ".kicad_sym"
+        msg += setting.check_symbollib(libname, add_if_possible, prefix)
+    elif os.path.isfile(sym_dir_old):
+        libname = LIB_NAME + "_kicad_sym.kicad_sym"
+        msg += setting.check_symbollib(libname, add_if_possible, prefix)
 
-        libdir = os.path.join(DEST_PATH, name + ".pretty")
-        if os.path.isdir(libdir):
-            msg += setting.check_footprintlib(name, add_if_possible, prefix)
+    if os.path.isfile(sym_dir_convert):
+        libname = LIB_NAME + "_old_lib.kicad_sym"
+        msg += setting.check_symbollib(libname, add_if_possible, prefix)
+
+    sym_dir = os.path.join(DEST_PATH, LIB_NAME + ".pretty")
+    if os.path.isdir(sym_dir):
+        msg += setting.check_footprintlib(LIB_NAME, add_if_possible, prefix)
 
     if msg == "[info] ":
         msg=""

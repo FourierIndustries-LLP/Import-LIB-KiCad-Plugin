@@ -17,7 +17,7 @@ import wx.xrc
 class impartGUI ( wx.Dialog ):
 
     def __init__( self, parent ):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"KiCad Importer", pos = wx.DefaultPosition, size = wx.Size( 655,618 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.BORDER_DEFAULT )
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"KiCad Importer", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.BORDER_DEFAULT )
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
@@ -33,7 +33,7 @@ class impartGUI ( wx.Dialog ):
 
         self.m_text = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_BESTWRAP|wx.TE_MULTILINE|wx.TE_READONLY )
         self.m_text.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
-        self.m_text.SetMinSize( wx.Size( -1,100 ) )
+        self.m_text.SetMinSize( wx.Size( -1,130 ) )
 
         bSizer.Add( self.m_text, 0, wx.ALL|wx.EXPAND, 5 )
 
@@ -165,8 +165,9 @@ class impartGUI ( wx.Dialog ):
 
         fgSizer21.Add( self.m_staticText_librarypath, 0, wx.ALL, 5 )
 
-        self.m_dirPicker_librarypath = wx.DirPickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a folder", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE )
+        self.m_dirPicker_librarypath = wx.DirPickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a folder", wx.DefaultPosition, wx.Size( -1,-1 ), wx.DIRP_DEFAULT_STYLE )
         self.m_dirPicker_librarypath.SetFont( wx.Font( 13, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
+        self.m_dirPicker_librarypath.SetMinSize( wx.Size( 300,-1 ) )
         self.m_dirPicker_librarypath.SetMaxSize( wx.Size( -1,25 ) )
 
         fgSizer21.Add( self.m_dirPicker_librarypath, 0, wx.ALL|wx.EXPAND, 5 )
@@ -216,6 +217,7 @@ class impartGUI ( wx.Dialog ):
 
         self.SetSizer( bSizer )
         self.Layout()
+        bSizer.Fit( self )
 
         self.Centre( wx.BOTH )
 
