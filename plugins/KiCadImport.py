@@ -403,7 +403,7 @@ class import_lib:
         if footprint_path_item.name.endswith("mod"):
             footprint = footprint_path_item.read_text(encoding="utf-8")
 
-            footprint_write_path = self.DEST_PATH / library_name / (library_name + ".pretty")
+            footprint_write_path = self.DEST_PATH / (library_name + ".pretty")
             footprint_file_read = footprint_write_path / footprint_path_item.name
             # self.print(f'[debug] Footprint file read: {footprint_file_read}')
             footprint_file_write = footprint_write_path / (
