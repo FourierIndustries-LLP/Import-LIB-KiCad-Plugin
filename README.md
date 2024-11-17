@@ -70,6 +70,8 @@ ${KICAD_3RD_PARTY}/My_Library_1/My_Library_1.kicad_sym
 
 where `My_Library_1` is the name of your library. 
 
+> **Warning**: The Nickname of the symbol library MUST be identical to the directory name of the library!
+
 <img src="doc/image-1.png" width=66% />
 
 
@@ -82,6 +84,8 @@ ${KICAD_3RD_PARTY}/My_Library_1/My_Library_1.pretty
 ```
 
 where `My_Library_1` is the name of your library. 
+
+> **Warning**: The Nickname of the symbol library MUST be identical to the directory name of the library!
 
 <img src="doc/image-2.png" width=66% />
 
