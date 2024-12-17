@@ -10,7 +10,7 @@
 
 This plugin is a fork of the highly popular [Import-LIB-KiCad-Plugin](https://github.com/Steffen-W/Import-LIB-KiCad-Plugin), with an improved UI designed for a more professional KiCad library management workflow.
 
-Download the plugin [here](https://github.com/FourierIndustries-LLP/Import-LIB-KiCad-Plugin/raw/refs/heads/master/Import-LIB-KiCad-Plugin.zip)!
+[![Download Plugin](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download Plugin")](https://github.com/FourierIndustries-LLP/Import-LIB-KiCad-Plugin/raw/refs/heads/master/Import-LIB-KiCad-Plugin.zip)
 
 ## Design Philosophy
 
@@ -30,7 +30,13 @@ All of the symbols, footprints and 3D models are placed in one custom-named libr
 
 ## Installation
 
-Install this plugin using the KiCad Package Content Manager (PCM) with the "Install from File..." option.
+**Step 1**: Download the plugin:
+
+[![Download Plugin](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download Plugin")](https://github.com/FourierIndustries-LLP/Import-LIB-KiCad-Plugin/raw/refs/heads/master/Import-LIB-KiCad-Plugin.zip)
+
+**Step 2**: Install this plugin using the KiCad Package Content Manager (PCM) with the "Install from File..." option.
+
+<img src="doc/image-6.png" width=75% />
 
 ## Setup
 
@@ -70,7 +76,10 @@ ${KICAD_3RD_PARTY}/My_Library_1/My_Library_1.kicad_sym
 
 where `My_Library_1` is the name of your library. 
 
-> **Warning**: The Nickname of the symbol library MUST be identical to the directory name of the library!
+> [!WARNING]  
+> The Nickname of the symbol library MUST be identical to the directory name of the library! For example, if the name of the folder is "My_Library_1", and the name of the symbol library is "My_Library_1.kicad_sym", the Nickname MUST be "My_Library_1" as well. 
+> See the image below for more information: 
+> <img src="doc/image-7.png" width=66% />
 
 <img src="doc/image-1.png" width=66% />
 
@@ -85,7 +94,8 @@ ${KICAD_3RD_PARTY}/My_Library_1/My_Library_1.pretty
 
 where `My_Library_1` is the name of your library. 
 
-> **Warning**: The Nickname of the symbol library MUST be identical to the directory name of the library!
+> [!WARNING]  
+> The Nickname of the footprint library MUST be identical to the directory name of the library, following the same rule as the symbol library.
 
 <img src="doc/image-2.png" width=66% />
 

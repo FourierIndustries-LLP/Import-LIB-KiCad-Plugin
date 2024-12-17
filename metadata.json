@@ -2,24 +2,24 @@
     "$schema": "https://go.kicad.org/pcm/schemas/v1",
     "name": "KiCad Importer",
     "description": "Import library files from Octopart, Samacsys, Ultralibrarian and EasyEDA",
-    "description_full": "Import library files from Octopart, Samacsys, Ultralibrarian and EasyEDA.\n For usage and correct setup please read the Readme: \n https://github.com/Steffen-W/Import-LIB-KiCad-Plugin#use-of-the-application",
+    "description_full": "Import library files from Octopart, Samacsys, Ultralibrarian and EasyEDA.\n For usage and correct setup please read the Readme: \n https://github.com/FourierIndustries-LLP/Import-LIB-KiCad-Plugin/blob/master/README.md#setup",
     "identifier": "industries.fourier.kicadimport",
     "type": "plugin",
     "author": {
-        "name": "Steffen Wittemeier",
+        "name": "Pan Ziyue",
         "contact": {
-            "github": "https://github.com/Steffen-W"
+            "github": "https://github.com/d3lta-v"
         }
     },
     "maintainer": {
-        "name": "Steffen Wittemeier",
+        "name": "Pan Ziyue",
         "contact": {
-            "github": "https://github.com/Steffen-W"
+            "github": "https://github.com/d3lta-v"
         }
     },
     "license": "GPL-3.0",
     "resources": {
-        "homepage": "https://github.com/Steffen-W/Import-LIB-KiCad-Plugin"
+        "homepage": "https://github.com/FourierIndustries-LLP/Import-LIB-KiCad-Plugin"
     },
     "tags": [
         "import",
