@@ -78,10 +78,8 @@ where `My_Library_1` is the name of your library.
 
 > [!WARNING]  
 > The Nickname of the symbol library MUST be identical to the directory name of the library! For example, if the name of the folder is "My_Library_1", and the name of the symbol library is "My_Library_1.kicad_sym", the Nickname MUST be "My_Library_1" as well. 
-> See the image below for more information: 
-> <img src="doc/image-7.png" width=66% />
 
-<img src="doc/image-1.png" width=66% />
+<img src="doc/image-7.png" width=66% />
 
 
 **Step 3**: Add the footprint library
