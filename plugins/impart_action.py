@@ -147,9 +147,9 @@ class impart_backend:
                 )
                 self.print2buffer("[info] " + res)
             except AssertionError as e:
-                self.print2buffer("[error] " + e)
+                self.print2buffer("[error] " + str(e))
             except Exception as e:
-                self.print2buffer("[error] " + e)
+                self.print2buffer("[error] " + str(e))
                 backend_h.print2buffer(f"Error: {e}")
                 backend_h.print2buffer("Python version " + sys.version)
                 print(traceback.format_exc())
