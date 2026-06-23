@@ -43,25 +43,28 @@ class config_handler:
     def __init__(self, config_path):
         self.config = configparser.ConfigParser()
         self.config_path = config_path
-        self.config_is_set = False
+        self.config_is_set = True
+
         try:
-            self.config.read(self.config_path)
-            self.config["config"]["SRC_PATH"]  # only for check
-            self.config["config"]["DEST_PATH"]  # only for check
-            self.config["config"]["LIB_NAME"]
-            self.config["config"]["PREFIX"]
-            self.config_is_set = True
-        except:
+            files_read = self.config.read(self.config_path)
+        except Exception:
+            files_read = []
             self.print(
                 "[error] An exception occurred when trying to read the configuration file at "
                 + self.config_path
             )
-            self.config = configparser.ConfigParser()
-            self.config.add_section("config")
-            self.config.set("config", "SRC_PATH", "")
-            self.config.set("config", "DEST_PATH", "")
-            self.config.set("config", "LIB_NAME", "")
-            self.config.set("config", "PREFIX", "")
+
+        if not files_read or not self.config.has_section("config"):
+            # No usable config file yet (e.g. first run).
+            if not self.config.has_section("config"):
+                self.config.add_section("config")
+            self.config_is_set = False
+
+        # Backfill missing keys WITHOUT discarding existing values. Older config
+        # files predate some keys (e.g. PREFIX) and must not be wiped on upgrade.
+        for key in ("SRC_PATH", "DEST_PATH", "LIB_NAME", "PREFIX"):
+            if not self.config.has_option("config", key):
+                self.config.set("config", key, "")
 
         # Set default values if not previously saved
         if self.config["config"]["SRC_PATH"] == "":
