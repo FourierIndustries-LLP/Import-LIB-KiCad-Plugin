@@ -5,12 +5,7 @@ import os
 import logging
 
 from easyeda2kicad.easyeda.easyeda_api import EasyedaApi
-from easyeda2kicad.kicad.parameters_kicad_symbol import KicadVersion
 from easyeda2kicad.easyeda.parameters_easyeda import EeSymbol
-
-from easyeda2kicad.helpers import add_component_in_symbol_lib_file
-from easyeda2kicad.helpers import id_already_in_symbol_lib
-from easyeda2kicad.helpers import update_component_in_symbol_lib_file
 
 from easyeda2kicad.easyeda.easyeda_importer import Easyeda3dModelImporter
 from easyeda2kicad.easyeda.easyeda_importer import EasyedaFootprintImporter
@@ -19,6 +14,8 @@ from easyeda2kicad.easyeda.easyeda_importer import EasyedaSymbolImporter
 from easyeda2kicad.kicad.export_kicad_3d_model import Exporter3dModelKicad
 from easyeda2kicad.kicad.export_kicad_footprint import ExporterFootprintKicad
 from easyeda2kicad.kicad.export_kicad_symbol import ExporterSymbolKicad
+from easyeda2kicad.kicad.export_kicad_symbol import id_already_in_symbol_lib
+from easyeda2kicad.kicad.export_kicad_symbol import write_component_in_symbol_lib_file
 
 
 class easyeda2kicad_wrapper:
@@ -30,23 +27,23 @@ class easyeda2kicad_wrapper:
         cad_data,
         output,
         overwrite=False,
-        kicad_version=KicadVersion.v6,
         sym_lib_ext="kicad_sym",
         prefix="",
     ):
         importer = EasyedaSymbolImporter(easyeda_cp_cad_data=cad_data)
         easyeda_symbol: EeSymbol = importer.get_symbol()
-        
+
         # Add prefix to symbol name and package name
         if len(prefix) > 0:
             easyeda_symbol.info.name = prefix + '_' + easyeda_symbol.info.name
-            if easyeda_symbol.info.package is not None:
+            if easyeda_symbol.info.package:
                 easyeda_symbol.info.package = prefix + '_' + easyeda_symbol.info.package
 
+        lib_path = f"{output}.{sym_lib_ext}"
+
         is_id_already_in_symbol_lib = id_already_in_symbol_lib(
-            lib_path=f"{output}.{sym_lib_ext}",
+            lib_path=lib_path,
             component_name=easyeda_symbol.info.name,
-            kicad_version=kicad_version,
         )
 
         if not overwrite and is_id_already_in_symbol_lib:
@@ -55,29 +52,22 @@ class easyeda2kicad_wrapper:
             )
             return 1
 
-        exporter = ExporterSymbolKicad(
-            symbol=easyeda_symbol, kicad_version=kicad_version
-        )
+        # The symbol format version is inferred from the existing library file.
+        exporter = ExporterSymbolKicad(symbol=easyeda_symbol, lib_path=lib_path)
         kicad_symbol_lib = exporter.export(
             footprint_lib_name=output.split("/")[-1].split(".")[0],
         )
 
-        if is_id_already_in_symbol_lib:
-            update_component_in_symbol_lib_file(
-                lib_path=f"{output}.{sym_lib_ext}",
-                component_name=easyeda_symbol.info.name,
-                component_content=kicad_symbol_lib,
-                kicad_version=kicad_version,
-            )
-        else:
-            add_component_in_symbol_lib_file(
-                lib_path=f"{output}.{sym_lib_ext}",
-                component_content=kicad_symbol_lib,
-                kicad_version=kicad_version,
-            )
+        # Writes the symbol into the library file, replacing it if it already exists.
+        write_component_in_symbol_lib_file(
+            lib_path=lib_path,
+            component_name=easyeda_symbol.info.name,
+            component_content=kicad_symbol_lib,
+            version=exporter.version,
+        )
 
         self.print(f"[info] Created Kicad symbol {easyeda_symbol.info.name}")
-        print(f"[info] Library path : {output}.{sym_lib_ext}")
+        print(f"[info] Library path : {lib_path}")
 
     def import_Footprint(
         self,
@@ -125,46 +115,47 @@ class easyeda2kicad_wrapper:
         print(f"[info] Footprint path: {os.path.join(footprint_path, footprint_filename)}")
 
     def import_3D_Model(self, cad_data, output, prefix=""):
-        exporter = Exporter3dModelKicad(
-            model_3d=Easyeda3dModelImporter(
-                easyeda_cp_cad_data=cad_data, download_raw_3d_model=True
-            ).output
-        )
-        exporter.export(lib_path=output)
+        model_3d = Easyeda3dModelImporter(
+            easyeda_cp_cad_data=cad_data, download_raw_3d_model=True
+        ).output
+        exporter = Exporter3dModelKicad(model_3d=model_3d)
 
-        if exporter.output or exporter.output_step:
-            filename_wrl = f"{exporter.output.name}.wrl"
-            filename_step = f"{exporter.output.name}.step"
-            lib_path = f"{output}.3dshapes"
+        # No 3D model available for this component.
+        if not exporter.output:
+            return
 
-            # Add prefix to name
-            if len(prefix) > 0:
-                name_with_prefix = prefix + '_' + exporter.output.name
-                filename_wrl_new = prefix + '_' + filename_wrl
-                filename_step_new = prefix + '_' + filename_step
-                # Rename
-                old_wrl_dir = os.path.join(lib_path, filename_wrl)
-                old_step_dir = os.path.join(lib_path, filename_step)
-                new_wrl_dir = os.path.join(lib_path, filename_wrl_new)
-                new_step_dir = os.path.join(lib_path, filename_step_new)
-                os.rename(old_wrl_dir, new_wrl_dir)
-                os.rename(old_step_dir, new_step_dir)
-            else:
-                name_with_prefix = exporter.output.name
-                new_wrl_dir = os.path.join(lib_path, filename_wrl)
-                new_step_dir = os.path.join(lib_path, filename_step)
+        # `export()` now writes the .wrl/.step files directly into the
+        # given output directory (the .3dshapes folder).
+        lib_path = f"{output}.3dshapes"
+        exporter.export(output_dir=lib_path)
 
-            formats = ""
-            if filename_wrl:
-                formats += "wrl"
-            if filename_step:
-                formats += ",step"
+        model_name = exporter.output.name
+        has_step = exporter.output_step is not None
+        filename_wrl = f"{model_name}.wrl"
+        filename_step = f"{model_name}.step"
 
-            self.print(f"Created 3D model {name_with_prefix} ({formats})")
-            if filename_wrl:
-                print("3D model path (wrl): " + new_wrl_dir)
-            if filename_step:
-                print("3D model path (step): " + new_step_dir)
+        # The files are written unprefixed; rename them to add the prefix so
+        # they match the prefixed reference stored inside the footprint.
+        if len(prefix) > 0:
+            name_with_prefix = prefix + '_' + model_name
+            new_wrl_dir = os.path.join(lib_path, prefix + '_' + filename_wrl)
+            new_step_dir = os.path.join(lib_path, prefix + '_' + filename_step)
+            os.rename(os.path.join(lib_path, filename_wrl), new_wrl_dir)
+            if has_step:
+                os.rename(os.path.join(lib_path, filename_step), new_step_dir)
+        else:
+            name_with_prefix = model_name
+            new_wrl_dir = os.path.join(lib_path, filename_wrl)
+            new_step_dir = os.path.join(lib_path, filename_step)
+
+        formats = "wrl"
+        if has_step:
+            formats += ",step"
+
+        self.print(f"Created 3D model {name_with_prefix} ({formats})")
+        print("3D model path (wrl): " + new_wrl_dir)
+        if has_step:
+            print("3D model path (step): " + new_step_dir)
 
     def full_import(
         self,
